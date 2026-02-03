@@ -1,0 +1,1 @@
+run-local: dotnet run --lunch-profile https

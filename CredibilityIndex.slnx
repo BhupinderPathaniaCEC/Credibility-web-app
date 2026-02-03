@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Src/">
+    <Project Path="Src/CredibilityIndex.Api/CredibilityIndex.Api.csproj" />
+    <Project Path="Src/CredibilityIndex.Application/CredibilityIndex.Application.csproj" />
+    <Project Path="Src/CredibilityIndex.Domain/CredibilityIndex.Domain.csproj" />
+    <Project Path="Src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj" />
+    <Project Path="Src/CredibilityIndex.Shared/CredibilityIndex.Shared.csproj" />
+  </Folder>
+</Solution>
