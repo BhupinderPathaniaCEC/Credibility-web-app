@@ -36,6 +36,42 @@
             "related": ".pdb;.xml"
           }
         }
+      },
+      "CredibilityIndex.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "CredibilityIndex.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/CredibilityIndex.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/CredibilityIndex.Application.dll": {}
+        }
+      },
+      "CredibilityIndex.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/CredibilityIndex.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/CredibilityIndex.Domain.dll": {}
+        }
+      },
+      "CredibilityIndex.Infrastructure/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "CredibilityIndex.Application": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/CredibilityIndex.Infrastructure.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/CredibilityIndex.Infrastructure.dll": {}
+        }
       }
     }
   },
@@ -75,10 +111,27 @@
         "microsoft.openapi.2.0.0.nupkg.sha512",
         "microsoft.openapi.nuspec"
       ]
+    },
+    "CredibilityIndex.Application/1.0.0": {
+      "type": "project",
+      "path": "../CredibilityIndex.Application/CredibilityIndex.Application.csproj",
+      "msbuildProject": "../CredibilityIndex.Application/CredibilityIndex.Application.csproj"
+    },
+    "CredibilityIndex.Domain/1.0.0": {
+      "type": "project",
+      "path": "../CredibilityIndex.Domain/CredibilityIndex.Domain.csproj",
+      "msbuildProject": "../CredibilityIndex.Domain/CredibilityIndex.Domain.csproj"
+    },
+    "CredibilityIndex.Infrastructure/1.0.0": {
+      "type": "project",
+      "path": "../CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj",
+      "msbuildProject": "../CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "CredibilityIndex.Application >= 1.0.0",
+      "CredibilityIndex.Infrastructure >= 1.0.0",
       "Microsoft.AspNetCore.OpenApi >= 10.0.2"
     ]
   },
@@ -113,7 +166,14 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj": {
+              "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj"
+            },
+            "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj": {
+              "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

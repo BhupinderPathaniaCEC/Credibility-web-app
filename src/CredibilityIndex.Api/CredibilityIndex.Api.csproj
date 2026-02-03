@@ -10,4 +10,9 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CredibilityIndex.Application\CredibilityIndex.Application.csproj" />
+    <ProjectReference Include="..\CredibilityIndex.Infrastructure\CredibilityIndex.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

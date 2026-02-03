@@ -6,4 +6,10 @@
     <Project Path="Src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj" />
     <Project Path="Src/CredibilityIndex.Shared/CredibilityIndex.Shared.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CredibilityIndex.Apitests/CredibilityIndex.Apitests.csproj" />
+    <Project Path="tests/CredibilityIndex.IntegrationTests/CredibilityIndex.IntegrationTests.csproj" />
+    <Project Path="tests/CredibilityIndex.UnitTests/CredibilityIndex.UnitTests.csproj" />
+  </Folder>
+  
 </Solution>
