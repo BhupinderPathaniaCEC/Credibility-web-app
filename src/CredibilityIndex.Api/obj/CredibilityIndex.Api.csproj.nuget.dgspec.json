@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Credibility_Project\\Src\\CredibilityIndex.Api\\CredibilityIndex.Api.csproj": {}
+    "D:\\Credibility_Project\\src\\CredibilityIndex.Api\\CredibilityIndex.Api.csproj": {}
   },
   "projects": {
-    "D:\\Credibility_Project\\Src\\CredibilityIndex.Api\\CredibilityIndex.Api.csproj": {
+    "D:\\Credibility_Project\\src\\CredibilityIndex.Api\\CredibilityIndex.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Credibility_Project\\Src\\CredibilityIndex.Api\\CredibilityIndex.Api.csproj",
+        "projectUniqueName": "D:\\Credibility_Project\\src\\CredibilityIndex.Api\\CredibilityIndex.Api.csproj",
         "projectName": "CredibilityIndex.Api",
-        "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Api\\CredibilityIndex.Api.csproj",
+        "projectPath": "D:\\Credibility_Project\\src\\CredibilityIndex.Api\\CredibilityIndex.Api.csproj",
         "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
-        "outputPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Api\\obj\\",
+        "outputPath": "D:\\Credibility_Project\\src\\CredibilityIndex.Api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -32,11 +32,11 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj": {
-                "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj"
+              "D:\\Credibility_Project\\src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj": {
+                "projectPath": "D:\\Credibility_Project\\src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj"
               },
-              "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj": {
-                "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj"
+              "D:\\Credibility_Project\\src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj": {
+                "projectPath": "D:\\Credibility_Project\\src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj"
               }
             }
           }
@@ -60,6 +60,10 @@
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[10.0.2, )"
+            },
+            "Swashbuckle.AspNetCore.SwaggerUI": {
+              "target": "Package",
+              "version": "[10.1.1, )"
             }
           },
           "imports": [
@@ -499,14 +503,14 @@
         }
       }
     },
-    "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj": {
+    "D:\\Credibility_Project\\src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj",
+        "projectUniqueName": "D:\\Credibility_Project\\src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj",
         "projectName": "CredibilityIndex.Application",
-        "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj",
+        "projectPath": "D:\\Credibility_Project\\src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj",
         "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
-        "outputPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\obj\\",
+        "outputPath": "D:\\Credibility_Project\\src\\CredibilityIndex.Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -527,8 +531,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Credibility_Project\\Src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj": {
-                "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj"
+              "D:\\Credibility_Project\\src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj": {
+                "projectPath": "D:\\Credibility_Project\\src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj"
               }
             }
           }
@@ -842,14 +846,14 @@
         }
       }
     },
-    "D:\\Credibility_Project\\Src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj": {
+    "D:\\Credibility_Project\\src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Credibility_Project\\Src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj",
+        "projectUniqueName": "D:\\Credibility_Project\\src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj",
         "projectName": "CredibilityIndex.Domain",
-        "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj",
+        "projectPath": "D:\\Credibility_Project\\src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj",
         "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
-        "outputPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Domain\\obj\\",
+        "outputPath": "D:\\Credibility_Project\\src\\CredibilityIndex.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -1181,14 +1185,14 @@
         }
       }
     },
-    "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj": {
+    "D:\\Credibility_Project\\src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj",
+        "projectUniqueName": "D:\\Credibility_Project\\src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj",
         "projectName": "CredibilityIndex.Infrastructure",
-        "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj",
+        "projectPath": "D:\\Credibility_Project\\src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj",
         "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
-        "outputPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\obj\\",
+        "outputPath": "D:\\Credibility_Project\\src\\CredibilityIndex.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -1209,8 +1213,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj": {
-                "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj"
+              "D:\\Credibility_Project\\src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj": {
+                "projectPath": "D:\\Credibility_Project\\src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj"
               }
             }
           }
