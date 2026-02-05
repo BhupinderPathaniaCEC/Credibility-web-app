@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CredibilityIndex.Apitests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+14078627efed388a7aee0b91249a8664428d5243")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+86e283aee7b2db1ae3209895cb5666c257d9c5bc")]
 [assembly: System.Reflection.AssemblyProductAttribute("CredibilityIndex.Apitests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CredibilityIndex.Apitests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

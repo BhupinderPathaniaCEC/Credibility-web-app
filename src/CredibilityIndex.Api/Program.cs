@@ -4,6 +4,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp",
+        policy =>
+        {
+            policy.WithOrigins("https://localhost:4200") // trust Angular App
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -13,6 +24,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAngularApp");
 
 var summaries = new[]
 {
@@ -32,6 +44,11 @@ app.MapGet("/", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+app.UseCors(policy => policy
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .WithOrigins("https://localhost:4200")); // trust Angular App
 
 app.Run();
 
