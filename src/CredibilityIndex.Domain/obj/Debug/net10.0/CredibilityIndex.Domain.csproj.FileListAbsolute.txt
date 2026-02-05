@@ -22,3 +22,15 @@ D:/Credibility_Project/src/CredibilityIndex.Domain/obj/Debug/net10.0/ref/Credibi
 /mnt/d/Credibility_Project/src/CredibilityIndex.Domain/obj/Debug/net10.0/refint/CredibilityIndex.Domain.dll
 /mnt/d/Credibility_Project/src/CredibilityIndex.Domain/obj/Debug/net10.0/CredibilityIndex.Domain.pdb
 /mnt/d/Credibility_Project/src/CredibilityIndex.Domain/obj/Debug/net10.0/ref/CredibilityIndex.Domain.dll
+/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/bin/Debug/net10.0/CredibilityIndex.Domain.deps.json
+/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/bin/Debug/net10.0/CredibilityIndex.Domain.dll
+/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/bin/Debug/net10.0/CredibilityIndex.Domain.pdb
+/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/obj/Debug/net10.0/CredibilityIndex.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/obj/Debug/net10.0/CredibilityIndex.Domain.AssemblyInfoInputs.cache
+/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/obj/Debug/net10.0/CredibilityIndex.Domain.AssemblyInfo.cs
+/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/obj/Debug/net10.0/CredibilityIndex.Domain.csproj.CoreCompileInputs.cache
+/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/obj/Debug/net10.0/CredibilityIndex.Domain.sourcelink.json
+/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/obj/Debug/net10.0/CredibilityIndex.Domain.dll
+/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/obj/Debug/net10.0/refint/CredibilityIndex.Domain.dll
+/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/obj/Debug/net10.0/CredibilityIndex.Domain.pdb
+/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/obj/Debug/net10.0/ref/CredibilityIndex.Domain.dll

@@ -1,42 +1,37 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Credibility_Project\\Src\\CredibilityIndex.Api\\CredibilityIndex.Api.csproj": {}
+    "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Api/CredibilityIndex.Api.csproj": {}
   },
   "projects": {
-    "D:\\Credibility_Project\\Src\\CredibilityIndex.Api\\CredibilityIndex.Api.csproj": {
+    "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Api/CredibilityIndex.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Credibility_Project\\Src\\CredibilityIndex.Api\\CredibilityIndex.Api.csproj",
+        "projectUniqueName": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Api/CredibilityIndex.Api.csproj",
         "projectName": "CredibilityIndex.Api",
-        "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Api\\CredibilityIndex.Api.csproj",
-        "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
-        "outputPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Api\\obj\\",
+        "projectPath": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Api/CredibilityIndex.Api.csproj",
+        "packagesPath": "/home/bhupinderpathania/.nuget/packages/",
+        "outputPath": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Api/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/home/bhupinderpathania/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj": {
-                "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj"
+              "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Application/CredibilityIndex.Application.csproj": {
+                "projectPath": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Application/CredibilityIndex.Application.csproj"
               },
-              "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj": {
-                "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj"
+              "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj": {
+                "projectPath": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj"
               }
             }
           }
@@ -81,7 +76,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.101/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
@@ -499,36 +494,31 @@
         }
       }
     },
-    "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj": {
+    "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Application/CredibilityIndex.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj",
+        "projectUniqueName": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Application/CredibilityIndex.Application.csproj",
         "projectName": "CredibilityIndex.Application",
-        "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj",
-        "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
-        "outputPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\obj\\",
+        "projectPath": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Application/CredibilityIndex.Application.csproj",
+        "packagesPath": "/home/bhupinderpathania/.nuget/packages/",
+        "outputPath": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Application/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/home/bhupinderpathania/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Credibility_Project\\Src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj": {
-                "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj"
+              "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/CredibilityIndex.Domain.csproj": {
+                "projectPath": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/CredibilityIndex.Domain.csproj"
               }
             }
           }
@@ -564,7 +554,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.101/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -842,28 +832,23 @@
         }
       }
     },
-    "D:\\Credibility_Project\\Src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj": {
+    "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/CredibilityIndex.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Credibility_Project\\Src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj",
+        "projectUniqueName": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/CredibilityIndex.Domain.csproj",
         "projectName": "CredibilityIndex.Domain",
-        "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Domain\\CredibilityIndex.Domain.csproj",
-        "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
-        "outputPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Domain\\obj\\",
+        "projectPath": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/CredibilityIndex.Domain.csproj",
+        "packagesPath": "/home/bhupinderpathania/.nuget/packages/",
+        "outputPath": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Domain/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/home/bhupinderpathania/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -903,7 +888,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.101/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -1181,36 +1166,31 @@
         }
       }
     },
-    "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj": {
+    "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj",
+        "projectUniqueName": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj",
         "projectName": "CredibilityIndex.Infrastructure",
-        "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\CredibilityIndex.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
-        "outputPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Infrastructure\\obj\\",
+        "projectPath": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj",
+        "packagesPath": "/home/bhupinderpathania/.nuget/packages/",
+        "outputPath": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Infrastructure/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/home/bhupinderpathania/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj": {
-                "projectPath": "D:\\Credibility_Project\\Src\\CredibilityIndex.Application\\CredibilityIndex.Application.csproj"
+              "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Application/CredibilityIndex.Application.csproj": {
+                "projectPath": "/home/bhupinderpathania/code/Credibility-web-app/src/CredibilityIndex.Application/CredibilityIndex.Application.csproj"
               }
             }
           }
@@ -1246,7 +1226,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.101/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
