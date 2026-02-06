@@ -42,7 +42,7 @@ Use the included `Makefile` to automate the setup:
     make build
     ```
 3.  **Run Locally**:
-    **Backend:** [Technical Setup Guide][src/README.md]
+    **Backend:** [Technical Setup Guide](src/README.md)
     * Frontend Setup: See ui/README.md for Angular UI instructions.
 
 ## Folder Structure
