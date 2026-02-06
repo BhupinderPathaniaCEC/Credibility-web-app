@@ -11,18 +11,14 @@ The user interface for the Credibility Index, built with Angular.
 1. **Prerequisites**: 
    - [Node.js](https://nodejs.org/) (LTS)
    - [Angular CLI](https://angular.io/cli) (`npm install -g @angular/cli`)
-2. **Install**: 
-   ```bash
-   cd credibility-ui
-   npm install
 
-   
+
 ## Development server
 
 To start a local development server, run:
 
 ```bash
-ng serve
+make dev-ui
 ```
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
@@ -46,7 +42,7 @@ ng generate --help
 To build the project run:
 
 ```bash
-ng build
+make build
 ```
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.

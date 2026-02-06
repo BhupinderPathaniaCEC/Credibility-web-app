@@ -27,6 +27,8 @@ Detailed architecture documentation can be found here: [docs/architecture.md](./
 * .NET 10 SDK
 * Node.js & npm
 * SQL Server
+* WSL2
+* Ubuntu Distribution
 
 ### Setup and Run
 Use the included `Makefile` to automate the setup:
@@ -40,9 +42,8 @@ Use the included `Makefile` to automate the setup:
     make build
     ```
 3.  **Run Locally**:
-    ```bash
-    make run-local
-    ```
+    * For FrontEnd (./ui/README.md)
+    * For BackEnd  (./src/README.md)
 
 ## Folder Structure
 Refer to the [Project Structure Map](./docs/workflow.md) for a full tree of the `src/` and `ui/` directories.
