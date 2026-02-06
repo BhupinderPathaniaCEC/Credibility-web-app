@@ -1,34 +1,58 @@
+# ==========================================
+# VARIABLES (Shortcuts for long paths)
+# ==========================================
+API_PROJ = src/CredibilityIndex.Api/CredibilityIndex.Api.csproj
+INFRA_PROJ = src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj
+APP_PROJ = src/CredibilityIndex.Application/CredibilityIndex.Application.csproj
+DOMAIN_PROJ = src/CredibilityIndex.Domain/CredibilityIndex.Domain.csproj
+UI_DIR = ui/credibility-ui
 
-# Link API to Application and Infrastructure
-# Link Infrastructure to Domain and Application
-# Link Application to Domain
-# Link Application to Domain
+# ==========================================
+# 1. INITIAL SETUP (Run these once)
+# ==========================================
 
+## setup: Links the internal projects together (defines the architecture)
 setup:
-	dotnet add src/CredibilityIndex.Api/CredibilityIndex.Api.csproj reference src/CredibilityIndex.Application/CredibilityIndex.Application.csproj src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj
-	
-	dotnet add src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj reference src/CredibilityIndex.Domain/CredibilityIndex.Domain.csproj src/CredibilityIndex.Application/CredibilityIndex.Application.csproj
-	
-	dotnet add src/CredibilityIndex.Application/CredibilityIndex.Application.csproj reference src/CredibilityIndex.Domain/CredibilityIndex.Domain.csproj
-	
+	@echo "Linking internal project references..."
+	dotnet add $(API_PROJ) reference $(APP_PROJ) $(INFRA_PROJ)
+	dotnet add $(INFRA_PROJ) reference $(DOMAIN_PROJ) $(APP_PROJ)
+	dotnet add $(APP_PROJ) reference $(DOMAIN_PROJ)
 	dotnet restore
 
-
-
-# Run this to create your database tables
+## db-init: Creates the database schema and applies it
 db-init:
-	dotnet ef migrations add InitialCreate --project src/CredibilityIndex.Infrastructure --startup-project src/CredibilityIndex.Api --output-dir Persistence/Migrations
-	dotnet ef database update --project src/CredibilityIndex.Infrastructure --startup-project src/CredibilityIndex.Api
+	@echo "Creating and applying database migrations..."
+	dotnet ef migrations add InitialCreate --project src/CredibilityIndex.Infrastructure --startup-project $(API_PROJ) --output-dir Persistence/Migrations
+	dotnet ef database update --project src/CredibilityIndex.Infrastructure --startup-project $(API_PROJ)
 
+# ==========================================
+# 2. DEPENDENCY MANAGEMENT (Run after git pull)
+# ==========================================
 
-# Run only the .NET Backend
+## install: Downloads external packages (NuGet and NPM)
+install:
+	@echo "Installing backend dependencies (NuGet)..."
+	dotnet restore
+	@echo "Installing frontend dependencies (NPM)..."
+	cd $(UI_DIR) && npm install
+
+# ==========================================
+# 3. DEVELOPMENT & RUNNING
+# ==========================================
+
+## build: Compiles the .NET solution
+build:
+	dotnet build
+
+## dev-backend: Runs the API with Hot Reload (auto-restarts on save)
 dev-backend:
-	dotnet watch run --project src/CredibilityIndex.Api/CredibilityIndex.Api.csproj
+	dotnet watch run --project $(API_PROJ)
 
-# Run only the React/NPM UI
+## dev-ui: Runs the frontend development server
 dev-ui:
-	cd ui/credibility-ui && npm install && ./node_modules/.bin/ng serve --host 0.0.0.0
+	cd $(UI_DIR) && npm start
 
-# Run both simultaneously (if you still want a single command)
+## dev: Runs both Backend and Frontend at the same time
 dev:
 	make -j 2 dev-backend dev-ui
+

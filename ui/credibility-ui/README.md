@@ -2,6 +2,21 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.2.
 
+
+# Credibility Index - Frontend UI
+
+The user interface for the Credibility Index, built with Angular.
+
+### 🚀 Local Setup
+1. **Prerequisites**: 
+   - [Node.js](https://nodejs.org/) (LTS)
+   - [Angular CLI](https://angular.io/cli) (`npm install -g @angular/cli`)
+2. **Install**: 
+   ```bash
+   cd credibility-ui
+   npm install
+
+   
 ## Development server
 
 To start a local development server, run:
