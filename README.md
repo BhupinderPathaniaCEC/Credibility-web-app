@@ -42,8 +42,8 @@ Use the included `Makefile` to automate the setup:
     make build
     ```
 3.  **Run Locally**:
-    * For FrontEnd (./ui/README.md)
-    * For BackEnd  (./src/README.md)
+    * Backend Setup: See src/README.md for .NET API instructions.
+    * Frontend Setup: See ui/README.md for Angular UI instructions.
 
 ## Folder Structure
 Refer to the [Project Structure Map](./docs/workflow.md) for a full tree of the `src/` and `ui/` directories.
