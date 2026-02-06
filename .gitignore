@@ -1,7 +1,8 @@
 #compiled output
 bin/
 obj/
-
+# [Bb]in/
+# [Ob]j/
 #IDE files
 .vscode/
 .vs/
