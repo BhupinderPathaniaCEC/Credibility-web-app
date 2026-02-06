@@ -1,10 +1,10 @@
 <Solution>
-  <Folder Name="/Src/">
-    <Project Path="Src/CredibilityIndex.Api/CredibilityIndex.Api.csproj" />
-    <Project Path="Src/CredibilityIndex.Application/CredibilityIndex.Application.csproj" />
-    <Project Path="Src/CredibilityIndex.Domain/CredibilityIndex.Domain.csproj" />
-    <Project Path="Src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj" />
-    <Project Path="Src/CredibilityIndex.Shared/CredibilityIndex.Shared.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/CredibilityIndex.Api/CredibilityIndex.Api.csproj" />
+    <Project Path="src/CredibilityIndex.Application/CredibilityIndex.Application.csproj" />
+    <Project Path="src/CredibilityIndex.Domain/CredibilityIndex.Domain.csproj" />
+    <Project Path="src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj" />
+    <Project Path="src/CredibilityIndex.Shared/CredibilityIndex.Shared.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/CredibilityIndex.Apitests/CredibilityIndex.Apitests.csproj" />

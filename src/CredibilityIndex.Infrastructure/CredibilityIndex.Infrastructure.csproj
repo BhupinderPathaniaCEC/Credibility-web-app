@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CredibilityIndex.Application\CredibilityIndex.Application.csproj" />
+    <ProjectReference Include="..\CredibilityIndex.Domain\CredibilityIndex.Domain.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

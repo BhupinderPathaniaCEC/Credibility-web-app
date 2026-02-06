@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CredibilityIndex.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+27fea6dd592f9f93d73c50ea5cb4f394a2eaf850")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+81990df88d8999785b1537a64b9b3ed445048bbc")]
 [assembly: System.Reflection.AssemblyProductAttribute("CredibilityIndex.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CredibilityIndex.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
