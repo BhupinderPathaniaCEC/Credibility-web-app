@@ -42,7 +42,7 @@ Use the included `Makefile` to automate the setup:
     make build
     ```
 3.  **Run Locally**:
-    * Backend Setup: See src/README.md for .NET API instructions.
+    **Backend:** [Technical Setup Guide][src/README.md]
     * Frontend Setup: See ui/README.md for Angular UI instructions.
 
 ## Folder Structure
@@ -55,3 +55,5 @@ Refer to the [Project Structure Map](./docs/workflow.md) for a full tree of the 
 
 ## License
 MIT License
+
+[def]: ./src/README.md
