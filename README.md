@@ -4,16 +4,6 @@ The Credibility Index is a full-stack solution designed with a Clean Architectur
 
 ---
 
-## 🏗 Project Structure
-
-```text
-credibility-index/
-├─ docs/                # QMS, Team guides, and Architecture Decision Records (ADRs)
-├─ src/                # Backend: .NET 8 Clean Architecture Projects
-│  └─ CredibilityIndex.sln
-├─ ui/                 # Frontend: React/TypeScript (Vite)
-└─ README.md           # Main project 
-```
 ## 🛠 WSL2 & Ubuntu Environment Setup
 
 This project is optimized for development inside **WSL2 (Windows Subsystem for Linux)** to ensure high performance and compatibility with Linux-based tooling.
@@ -70,6 +60,15 @@ Use the included `Makefile` to automate the setup:
     * Frontend:  [To Run FrontEnd Locally](./ui/README.md)- For FrontEnd.
 
 ## Folder Structure
+
+```text
+credibility-index/
+├─ docs/                # QMS, Team guides, and Architecture Decision Records (ADRs)
+├─ src/                # Backend: .NET 8 Clean Architecture Projects
+│  └─ CredibilityIndex.sln
+├─ ui/                 # Frontend: React/TypeScript (Vite)
+└─ README.md           # Main project 
+```
 Refer to the [Project Structure Map](./docs/workflow.md) for a full tree of the `src/` and `ui/` directories.
 
 ## Documentation Links
