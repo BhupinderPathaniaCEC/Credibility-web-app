@@ -1,7 +1,31 @@
-# Credibility-web-app
-A modern, full-stack web application that allows authenticated users to discover, rate, and review websites. This project demonstrates a secure implementation of ASP.NET Core Web API and Angular, focusing on robust authentication and reactive UI patterns
+# Credibility Index
+
+The Credibility Index is a full-stack solution designed with a Clean Architecture backend (.NET 8) and a modern frontend (React/Vite). This repository serves as the central hub for development, documentation, and deployment.
+
+---
+
+## 🏗 Project Structure
+
+```text
+credibility-index/
+├─ docs/                # QMS, Team guides, and Architecture Decision Records (ADRs)
+├─ src/                # Backend: .NET 8 Clean Architecture Projects
+│  └─ CredibilityIndex.sln
+├─ ui/                 # Frontend: React/TypeScript (Vite)
+└─ README.md           # Main project 
+```
+## 🛠 WSL2 & Ubuntu Environment Setup
+
+This project is optimized for development inside **WSL2 (Windows Subsystem for Linux)** to ensure high performance and compatibility with Linux-based tooling.
+
+### 1. Enable WSL2 and Ubuntu
+If you do not have WSL2 installed, run this command in **PowerShell (as Administrator)**:
+```powershell
+wsl --install -d Ubuntu
+```
 
 ## 📖 Documentation
+
 Welcome to the project! Please review the following guides before starting:
 * [🚀 Developer Onboarding Checklist](./docs/onboarding.md) - Setup your local environment.
 * [🔄 Working Agreements & Workflow](./docs/workflow.md) - Branching, PRs, and Definition of Done.
@@ -42,8 +66,8 @@ Use the included `Makefile` to automate the setup:
     make build
     ```
 3.  **Run Locally**:
-    **Backend:** [To Run BackEnd Locally](./src/README.md)- For BackEnd.
-    **Frontend:** [To Run FrontEnd Locally](./ui/README.md)- For FrontEnd.
+    * Backend:  [To Run BackEnd Locally](./src/README.md)- For BackEnd.
+    * Frontend:  [To Run FrontEnd Locally](./ui/README.md)- For FrontEnd.
 
 ## Folder Structure
 Refer to the [Project Structure Map](./docs/workflow.md) for a full tree of the `src/` and `ui/` directories.
