@@ -2,7 +2,30 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.2.
 
-
+## Folder Structure
+```
+ui/
+└── credibility-ui/                 # Main Angular Application
+    ├── src/
+    │   ├── app/
+    │   │   ├── core/               # Singleton services: auth, interceptors, guards, layout
+    │   │   ├── shared/             # Reusable components, pipes, and directives
+    │   │   ├── features/           # Feature-based modules
+    │   │   │   ├── auth/           # Login and Registration flows
+    │   │   │   ├── websites/       # Website management and monitoring
+    │   │   │   ├── ratings/        # Credibility rating logic and displays
+    │   │   │   └── admin/          # Administrative dashboard and controls
+    │   │   ├── app.routes.ts       # Main application routing definitions
+    │   │   ├── app.component.* # Root component files
+    │   │   └── app.config.ts       # Global application configuration
+    │   ├── assets/                 # Static assets (images, icons, fonts)
+    │   ├── environments/           # Environment-specific configurations (Dev/Prod)
+    │   └── main.ts                 # Main entry point for the application
+    ├── angular.json                # Angular CLI configuration
+    ├── package.json                # Project dependencies and scripts
+    ├── tsconfig.json               # TypeScript compiler configuration
+    └── README.md                   # UI-specific documentation           # Main project 
+```
 # Credibility Index - Frontend UI
 
 The user interface for the Credibility Index, built with Angular.
