@@ -2,6 +2,40 @@
 
 This folder contains the .NET 8.0 core implementation following Clean Architecture principles.
 
+### src folder Structure
+```
+src/
+├── CredibilityIndex.Api/              # ASP.NET Core Web API (Composition Root)
+│   ├── Controllers/                   # API Endpoints
+│   ├── Middlewares/                   # Custom Request/Response handling
+│   ├── Filters/                       # Action and Exception filters
+│   ├── Contracts/                     # Data Transfer Objects (DTOs)
+│   ├── Program.cs                     # App startup and DI configuration
+│   └── appsettings.json               # Environment configurations
+│
+├── CredibilityIndex.Application/      # Business Logic & Use Cases
+│   ├── Interfaces/                    # Contract definitions for Infra
+│   ├── UseCases/                      # Core application logic
+│   ├── Services/                      # Application services
+│   └── Validators/                    # Input validation logic
+│
+├── CredibilityIndex.Domain/           # Core Enterprise Logic (No dependencies)
+│   ├── Entities/                      # Database models/Domain objects
+│   ├── ValueObjects/                  # Complex types without identity
+│   ├── Enums/                         # Domain-specific enumerations
+│   └── Events/                        # Domain events
+│
+├── CredibilityIndex.Infrastructure/    # External Concerns & Persistence
+│   ├── Persistence/                   # Data Access Layer
+│   │   ├── DbContext/                 # EF Core Context
+│   │   ├── Configurations/            # Fluent API model configurations
+│   │   └── Migrations/                # Database version history
+│   ├── Repositories/                  # Implementation of Application interfaces
+│   └── Identity/                      # Authentication and Authorization logic
+│
+└── CredibilityIndex.Shared/           # Optional Shared Utilities & Helpers
+```
+
 ### 🏗 Architecture Overview
 * **Api**: Entry point, Controllers, and Middleware.
 * **Application**: Business logic, DTOs, and Request Handlers.
