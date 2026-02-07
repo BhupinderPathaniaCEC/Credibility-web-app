@@ -69,7 +69,7 @@ credibility-index/
 ├─ ui/                 # Frontend: React/TypeScript (Vite)
 └─ README.md           # Main project 
 ```
-Refer to the [Project Structure Map](./docs/workflow.md) for a full tree of the `src/` and `ui/` directories.
+Refer to the [Project Structure Map](./docs/workflow.md) for a full tree of the [`src/`](./src/README.md) and [`ui/`](./ui/README.md) directories.
 
 ## Documentation Links
 * [API Specification (OpenAPI)](./docs/team/openapi.yml)
