@@ -1,7 +1,7 @@
 ## 2.  (Software Design Document)
 This file fulfills the specific requirements from your guide regarding architecture, request lifecycles, and security.
 
-```markdown
+
 # # Software Design Document (SDD)
 
 ## 🏛 System Architecture
