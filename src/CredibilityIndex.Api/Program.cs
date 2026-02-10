@@ -23,11 +23,14 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwaggerUI(options => {options.SwaggerEndpoint("/openapi.json", "v1");
+    app.UseSwaggerUI(options => 
+    {
+        // This tells Swagger UI to look for the auto-generated JSON
+        options.SwaggerEndpoint("http://127.0.0.1:5149/openapi/v1.json", "v1");
     });
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseCors("AllowAngularApp");
 
 var summaries = new[]

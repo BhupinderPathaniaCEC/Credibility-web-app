@@ -8,7 +8,7 @@ This file fulfills the specific requirements from your guide regarding architect
 This project follows **Clean Architecture** principles to ensure the system is independent of UI, database, and external frameworks.
 
 * **Domain**: Core entities and business logic.
-* **Application**: Use cases and request handling (MediatR).
+* **Application**: Use cases and request handling .
 * **Infrastructure**: Database persistence (EF Core) and external services.
 * **API**: RESTful endpoints and entry points.
 

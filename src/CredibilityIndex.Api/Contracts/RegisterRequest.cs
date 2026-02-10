@@ -1,8 +1,7 @@
-// namespace
-// CredibilityIndex.Api.Contracts;
+namespace CredibilityIndex.Api.Contracts;
 
-// public record RegisterRequest(
-//     string Username,
-//     string Email,
-//     string  Password
-// );
+public record RegisterRequest(
+    string Email,
+    string Password,
+    string DisplayName
+);

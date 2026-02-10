@@ -1,23 +1,22 @@
-// using Microsoft.AspNetCore.Mvc;
-// using CredibilityIndex.Api.Contracts;
+using Microsoft.AspNetCore.Mvc;
+using CredibilityIndex.Api.Contracts;
 
-// namespace
-// CredibilityIndex.Api.Contracts;
+namespace CredibilityIndex.Api.Controllers;
 
-// [ApiController]
-// [Route("api/[controller]")]
+[ApiController]
+[Route("api/v1/auth")] // Matches your openapi.yml path
+public class AuthController : ControllerBase
+{
+    [HttpPost("register")]
+    public IActionResult Register([FromBody] RegisterRequest request)
+    {
+        // 1. Validation logic would go here
+        if (string.IsNullOrEmpty(request.Email)) return BadRequest("Email required");
 
-// public class AuthController :
-// ControllerBase
-// {
-//     [httpPost("register")]
-//     public IActionResult
-// Register([FromBody] RegisterRequest request)
-//   {
-//     if(string.IsNullorEmpty(request.Email)){
-//         return BadRequest("Email is required. ");
-//     }
-//     var result = $"User {request.Username} received successfully ";
-//     return oK(new { Message = result});
-//   }
-// }
+        // 2. For now, we simulate a successful registration
+        // In the next step, you will move this logic to the Application layer
+        var response = new RegisterResponse(Guid.NewGuid(), request.Email, request.DisplayName);
+
+        return CreatedAtAction(nameof(Register), response);
+    }
+}
