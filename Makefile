@@ -25,6 +25,13 @@ db-init:
 	dotnet ef migrations add InitialCreate --project src/CredibilityIndex.Infrastructure --startup-project $(API_PROJ) --output-dir Persistence/Migrations
 	dotnet ef database update --project src/CredibilityIndex.Infrastructure --startup-project $(API_PROJ)
 
+setup-dependencies:
+	dotnet restore
+	# Ensure EF Core is installed
+	dotnet add src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj package Microsoft.EntityFrameworkCore.Sqlite
+	dotnet add src/CredibilityIndex.Infrastructure/CredibilityIndex.Infrastructure.csproj package Microsoft.EntityFrameworkCore.Design
+	cd ui/credibility-ui && npm install
+
 # ==========================================
 # 2. DEPENDENCY MANAGEMENT (Run after git pull)
 # ==========================================

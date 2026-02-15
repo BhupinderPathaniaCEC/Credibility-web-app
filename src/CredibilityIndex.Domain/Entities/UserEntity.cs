@@ -1,9 +1,10 @@
 namespace CredibilityIndex.Domain.Entities;
 
-public class UserEntity : BaseEntity
+public class UserEntity
 {
-   
-    public string Username { get; set; } = string.Empty;
+    public Guid Id { get; set; }
     public string Email { get; set; } = string.Empty;
-    public string PasswordHash { get; set; } = string.Empty; // Never store plain text
+    public string PasswordHash { get; set; } = string.Empty;
+
+    public string DisplayName {get; set;} = string.Empty;
 }
