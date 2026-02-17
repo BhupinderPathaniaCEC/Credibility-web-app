@@ -79,4 +79,7 @@ Refer to the [Project Structure Map](./docs/workflow.md) for a full tree of the 
 ## License
 MIT License
 
-[def]: ./src/README.md
+
+## 📚 Documentation
+- **API Specification:** See [docs/team/api.md](./docs/team/api.md) for Token Endpoint usage.
+- **Security Design:** See [docs/qms/sdd.md](./docs/qms/sdd.md) for OpenIddict configuration.

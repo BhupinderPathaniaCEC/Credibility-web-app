@@ -69,3 +69,44 @@ The API uses standard HTTP status codes:
 404 Not Found: The requested category or domain does not exist.
 
 500 Server Error: Internal system failure.
+
+## Authentication Service (OpenIddict)
+
+The system uses OpenIddict to provide secure JWT tokens. Currently, only the Password Grant is supported. NOW  Browser-based redirects and interactive logins are NOT disabled for security.
+
+### Token Endpoint
+**URL:** `POST /connect/token`  
+**Authentication:** Password grant type 
+**Format:** `application/x-www-form-urlencoded`
+
+#### Request Body
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| grant_type | string | Yes | Must be password. |
+| username | string | Yes | The user's email address. |
+| password | string | Yes | The user's account password. |
+| scope | string | No | Optional permissions (e.g., openid profile email). |
+
+### Example Request (cURL)
+```bash
+curl -X POST https://api.credibility-index.com/api/auth/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=password&username=user@example.com&password=SecretPassword123"
+```
+
+#### Success Response (200 OK)
+```json
+{
+    "access_token": "eyJhbG...",
+    "token_type": "Bearer",
+    "expires_in": 3600,
+    "refresh_token": "..."
+}
+```
+### Validation Behavior:
+
+* The system checks the username against both Email and UserName fields.
+
+* Lockout: After multiple failed attempts, the account will be temporarily locked (lockoutOnFailure: true).
+
+* Error Response: For security, any invalid credential or user error returns a 403 Forbidden via the OpenIddict challenge.
