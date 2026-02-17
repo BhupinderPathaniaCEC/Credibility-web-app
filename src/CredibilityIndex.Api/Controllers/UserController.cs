@@ -1,7 +1,11 @@
+using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using CredibilityIndex.Application.Interfaces;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using static OpenIddict.Abstractions.OpenIddictConstants;
+
 
 
 namespace CredibilityIndex.Api.Controllers;
@@ -22,7 +26,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetProfile()
     {
         // Behind the scenes: The Middleware extracted the Email from the JWT Claim
-        var email = User.FindFirst(ClaimTypes.Email)?.Value;
+        var email = User.FindFirst(Claims.Email)?.Value ?? User.FindFirst(ClaimTypes.Email)?.Value;
 
         if (string.IsNullOrEmpty(email))
             return Unauthorized("User email not found in token.");

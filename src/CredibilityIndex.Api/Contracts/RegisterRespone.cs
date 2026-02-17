@@ -1,7 +1,8 @@
+using System;
 namespace CredibilityIndex.Api.Contracts;
 
 public record RegisterResponse(
-    Guid Id,
+    string Id,
     string Email,
     string DisplayName
 );

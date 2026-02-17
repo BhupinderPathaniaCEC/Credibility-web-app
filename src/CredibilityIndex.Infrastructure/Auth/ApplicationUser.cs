@@ -4,8 +4,6 @@ namespace CredibilityIndex.Infrastructure.Auth
 {
     public class ApplicationUser : IdentityUser
     {
-        // Add custom properties if needed later.
-        // Example:
-        // public string DisplayName { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
     }
 }
