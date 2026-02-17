@@ -35,6 +35,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 // -------------------------
 // 3. OpenIddict Server + Validation
 // -------------------------
+/// Access token lifetime is configured in appsettings.json and read here & without change code
+var accessTokenLifetime = builder.Configuration.GetValue<int>("IdentitySettings:AccessTokenLifetimeMinutes");
 builder.Services.AddOpenIddict()
     .AddCore(options =>
     {
@@ -51,6 +53,8 @@ builder.Services.AddOpenIddict()
         //Development signing & encryption credentials
         options.AddDevelopmentEncryptionCertificate()
                .AddDevelopmentSigningCertificate();
+        // In production, use a real certificate or other secure method to store keys
+        options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
 
         options.UseAspNetCore()
                .EnableTokenEndpointPassthrough()
