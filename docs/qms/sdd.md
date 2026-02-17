@@ -47,11 +47,11 @@ The AuthController handles both user provisioning and token issuance.
 
 * **Claims Transformation:** On successful authentication, the system generates a ClaimsIdentity containing:
 
-sub: User ID
+    * **sub:** User ID
 
-email: User email
+    * **name:** Username
 
-name: Username
+    * **email:** User email
 
 * **Security Constraints:** * Destinations are restricted to AccessToken.
 
