@@ -55,6 +55,6 @@ The AuthController handles both user provisioning and token issuance.
 
 * **Security Constraints:** * Destinations are restricted to AccessToken.
 
-Only PasswordGrant is accepted; other grant types return a ForbidResult.
+    * Only PasswordGrant is accepted; other grant types return a ForbidResult.
 
-Anti-forgery tokens are ignored for this endpoint to support cross-origin API calls (Chrome Extension).
+    * Anti-forgery tokens are ignored for this endpoint to support cross-origin API calls (Chrome Extension).
