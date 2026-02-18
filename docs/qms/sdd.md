@@ -58,3 +58,35 @@ The AuthController handles both user provisioning and token issuance.
     * Only PasswordGrant is accepted; other grant types return a ForbidResult.
 
     * Anti-forgery tokens are ignored for this endpoint to support cross-origin API calls (Chrome Extension).
+
+### Token Lifetime Configuration:
+The Access Token lifetime is configurable via the application settings hierarchy (JSON, Environment Variables, or Secrets), allowing security adjustments without code changes.
+
+# Configuration Keys
+
+## KeyDefaultDescriptionIdentitySettings
+
+|Key|Default|Description|
+|:---|:---|:---|
+|**IdentitySettings:AccessTokenLifetimeMinutes** |60 |Time in minutes until the JWT expires.|
+
+## Example appsettings.json:
+'''json
+{
+    "IdentitySettings": {
+        "AccessTokenLifetimeMinutes": 60
+    }
+}
+
+**Environment Variable Override:** IdentitySettings__AccessTokenLifetimeMinutes=30
+
+# Security Specifications
+
+### Identifier Claims
+Every generated access token includes a `sub` (Subject) claim containing the unique `ApplicationUser.Id` from the database.
+
+### Anti-Enumeration
+The `Exchange` action in `AuthController` uses a unified `Forbid()` response for all credential failures to prevent user existence discovery.
+
+### Flow Restriction
+Browser-based flows (Authorization Code/Implicit) are disabled in the OpenIddict configuration to prevent redirect-based attacks.

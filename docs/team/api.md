@@ -110,3 +110,4 @@ curl -X POST https://api.credibility-index.com/api/auth/token \
 * Lockout: After multiple failed attempts, the account will be temporarily locked (lockoutOnFailure: true).
 
 * Error Response: For security, any invalid credential or user error returns a 403 Forbidden via the OpenIddict challenge.
+
