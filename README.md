@@ -82,4 +82,4 @@ MIT License
 
 ## 📚 Documentation
 - **API Specification:** See [docs/team/api.md](./docs/team/api.md) for Token Endpoint usage.
-- **Security Design:** See [docs/qms/sdd.md](./docs/qms/sdd.md) for OpenIddict configuration.
+- **Software Design Document (SDD):** See [docs/qms/sdd.md](./docs/qms/sdd.md) for OpenIddict configuration.

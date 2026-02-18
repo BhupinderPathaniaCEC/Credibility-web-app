@@ -20,3 +20,4 @@ Below is the summary of the latest test execution from the CI/CD pipeline.
 | **CredibilityIndex.Api** | 0 | 0 | 0% | 🟡 Pending |
 | **CredibilityIndex.Domain** | 0 | 0 | 0% | 🟡 Pending |
 | **credibility-ui** | 0 | 0 | 0% | 🟡 Pending |
+

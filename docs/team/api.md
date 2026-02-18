@@ -103,6 +103,15 @@ curl -X POST https://api.credibility-index.com/api/auth/token \
     "refresh_token": "..."
 }
 ```
+**Failure (400 Bad Request):** To prevent User Enumeration, the system returns a generic invalid_grant error regardless of whether the email is missing or the password is wrong.
+
+```JSON
+{
+  "error": "invalid_grant",
+  "error_description": "The username/password couple is invalid."
+}
+```
+
 ### Validation Behavior:
 
 * The system checks the username against both Email and UserName fields.
