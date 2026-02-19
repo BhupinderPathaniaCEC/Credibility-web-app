@@ -120,3 +120,53 @@ curl -X POST https://api.credibility-index.com/api/auth/token \
 
 * Error Response: For security, any invalid credential or user error returns a 403 Forbidden via the OpenIddict challenge.
 
+### API Authentication Guide
+This API uses **OAuth 2.0 with JWT Bearer Tokens** to secure protected endpoints.
+Authentication and authorization are handled via **OpenIddict**.
+
+To access protected resources, clients must include a valid **JSON Web Token (JWT)** in the Authorization header of every HTTP request.
+
+# Header Format
+``` https
+Authorization: Bearer <YOUR_JWT_TOKEN>
+```
+# Example Request (curl)
+``` bash
+curl -X GET "http://localhost:5149/api/admin/stats" \
+     -H "Authorization: Bearer eyJhbGciOiJSUzI1..."
+```
+## 🛠 Obtaining a Token
+Tokens are obtained by sending a `POST` request to the token endpoint using the Resource Owner Password Credentials grant.
+
+# Endpoint
+```
+/connect/token
+```
+# Headers
+```https
+Content-Type: application/x-www-form-urlencoded
+```
+# Parameters
+
+|Parameter  |	Value|
+|grant_type  |	password|
+|username  |	Your email address|
+|password	 |Your account password|
+|client_id  |	mvp-client|
+|scope  |	openid profile email roles|
+
+# Example Token Request (curl)
+
+```bash
+curl -X POST "http://localhost:5149/connect/token" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "grant_type=password" \
+     -d "username=your@email.com" \
+     -d "password=yourpassword" \
+     -d "client_id=mvp-client" \
+     -d "scope=openid profile email roles"
+```
+
+# 🚦 Expected Error Responses:
+
+* [Error Responses](./docs/team/api.md) - API validates every request before it reaches the business logic layer.

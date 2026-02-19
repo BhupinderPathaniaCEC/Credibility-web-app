@@ -90,3 +90,31 @@ The `Exchange` action in `AuthController` uses a unified `Forbid()` response for
 
 ### Flow Restriction
 Browser-based flows (Authorization Code/Implicit) are disabled in the OpenIddict configuration to prevent redirect-based attacks.
+
+### 1. Authentication Mechanism
+The system implements **OAuth 2.0** using the OpenIddict framework. Authentication is stateless, utilizing **JWT (JSON Web Tokens)** to carry user identity and authorization claims.
+
+* **Grant Type:** Resource Owner Password Credentials (ROPC).
+
+* **Token Validation**: Handled by the `OpenIddict.Validation.AspNetCore` middleware, which verifies the digital signature, expiration, and issuer of incoming tokens.
+
+* **Transport Security:** For development environments, `DisableTransportSecurityRequirement()` is applied to allow testing over HTTP.
+
+### 2. Endpoint Protection Strategy
+Authorization is enforced using a layered approach:
+
+* **Global Middleware:** `app.UseAuthentication()` and `app.UseAuthorization()` are registered in the request pipeline. This ensures that every request is inspected for a valid security context before reaching the controller.
+
+* **Declarative Filters:** Protected endpoints are annotated with the `[Authorize]` attribute.
+
+* **Role-Based Access Control (RBAC):** Administrative endpoints (e.g., `AdminController`) are explicitly restricted using `[Authorize(Roles = "Admin")]`.
+
+3. Security Response Matrix (E2E Validation)
+The following table defines the system's behavior for protected resources, fulfilling the requirement for standardized error responses:
+
+|Condition |Middleware Action| HTTP Status|
+|:---|:---|:---:|
+|**No Token Provided** |Authentication Challenge |**401 Unauthorized**|
+|**Invalid/Expired Token** |Validation Failure |**401 Unauthorized**|
+|**Valid Token, Wrong Role** |Authorization Denial |**403 Forbidden**|
+|**Valid Token + Correct Role** |Request Processed |**200 OK**|
