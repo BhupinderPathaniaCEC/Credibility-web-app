@@ -91,7 +91,7 @@ The `Exchange` action in `AuthController` uses a unified `Forbid()` response for
 ### Flow Restriction
 Browser-based flows (Authorization Code/Implicit) are disabled in the OpenIddict configuration to prevent redirect-based attacks.
 
-### 1. Authentication Mechanism
+# 1. Authentication Mechanism
 The system implements **OAuth 2.0** using the OpenIddict framework. Authentication is stateless, utilizing **JWT (JSON Web Tokens)** to carry user identity and authorization claims.
 
 * **Grant Type:** Resource Owner Password Credentials (ROPC).
