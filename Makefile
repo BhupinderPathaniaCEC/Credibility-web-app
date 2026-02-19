@@ -53,7 +53,7 @@ build:
 
 ## dev-backend: Runs the API with Hot Reload (auto-restarts on save)
 dev-backend:
-	dotnet watch run --project $(API_PROJ)
+	dotnet watch run --project $(API_PROJ) --launch-profile https
 
 ## dev-ui: Runs the frontend development server
 dev-ui:

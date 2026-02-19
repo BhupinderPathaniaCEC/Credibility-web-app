@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using OpenIddict.Validation.AspNetCore;
 using OpenIddict.Server;
+using static OpenIddict.Abstractions.OpenIddictConstants.GrantTypes;
 
 using CredibilityIndex.Application.Interfaces;
 using CredibilityIndex.Infrastructure.Persistence;
@@ -46,13 +47,18 @@ builder.Services.AddOpenIddict()
     .AddServer(options =>
     {
         options.SetTokenEndpointUris("/connect/token");
+        
+        // Register grant types explicitly
         options.AllowPasswordFlow();
         options.AllowRefreshTokenFlow();
-
+        
+        // Accept anonymous clients (allows client_id/client_secret without pre-registration validation)
+        options.AcceptAnonymousClients();
 
         //Development signing & encryption credentials
         options.AddDevelopmentEncryptionCertificate()
                .AddDevelopmentSigningCertificate();
+        
         // In production, use a real certificate or other secure method to store keys
         options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
 
@@ -71,7 +77,13 @@ builder.Services.AddOpenIddict()
 // -------------------------
 // 4. Authentication
 // -------------------------
-builder.Services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+});
+
+builder.Services.AddAuthorization();
 
 // -------------------------
 // 5. Controllers
@@ -100,6 +112,15 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    try 
+    {
+        await OpenIddictClientSeeder.SeedAsync(services);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred seeding the DB.");
+    }
     var db = services.GetRequiredService<CredibilityDbContext>();
     await db.Database.MigrateAsync();
     await OpenIddictClientSeeder.SeedAsync(services);
