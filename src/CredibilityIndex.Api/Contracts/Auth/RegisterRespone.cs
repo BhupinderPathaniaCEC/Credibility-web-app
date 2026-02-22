@@ -1,5 +1,6 @@
 using System;
-namespace CredibilityIndex.Api.Contracts;
+
+namespace CredibilityIndex.Api.Contracts.Auth;
 
 public record RegisterResponse(
     string Id,

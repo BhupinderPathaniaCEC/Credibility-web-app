@@ -17,12 +17,6 @@ namespace CredibilityIndex.Api.Controllers;
 [Route("api/[controller]")]
 public class TestController : ControllerBase
 {
-    private readonly IUserRepository _userRepository;
-
-    public TestController(IUserRepository userRepository)
-    {
-        _userRepository = userRepository;
-    }
 
     // Existing Register and Login methods...
 

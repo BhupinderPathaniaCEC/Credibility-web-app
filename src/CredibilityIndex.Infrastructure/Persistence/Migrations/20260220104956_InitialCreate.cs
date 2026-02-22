@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace CredibilityIndex.Infrastructure.Migrations
+namespace CredibilityIndex.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -30,7 +30,7 @@ namespace CredibilityIndex.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
-                    DisplayName = table.Column<string>(type: "TEXT", nullable: false, defaultValue: ""),
+                    DisplayName = table.Column<string>(type: "TEXT", nullable: false),
                     UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
@@ -49,6 +49,22 @@ namespace CredibilityIndex.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Slug = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -94,20 +110,6 @@ namespace CredibilityIndex.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OpenIddictScopes", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Email = table.Column<string>(type: "TEXT", nullable: false),
-                    PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
-                    DisplayName = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -363,13 +365,13 @@ namespace CredibilityIndex.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Categories");
+
+            migrationBuilder.DropTable(
                 name: "OpenIddictScopes");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictTokens");
-
-            migrationBuilder.DropTable(
-                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

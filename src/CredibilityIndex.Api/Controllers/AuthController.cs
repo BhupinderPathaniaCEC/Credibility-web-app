@@ -11,7 +11,7 @@ using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using CredibilityIndex.Infrastructure.Auth;
-using CredibilityIndex.Api.Contracts;
+using CredibilityIndex.Api.Contracts.Auth;
 
 namespace CredibilityIndex.Api.Controllers
 {

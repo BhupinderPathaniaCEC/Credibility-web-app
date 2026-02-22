@@ -1,19 +1,48 @@
 
-## 🧪 Unit Test Report (UTR)
+# 1.0🧪 Unit Test Report (UTR)
 
-### 🧪 Testing Strategy
-The Credibility Index project implements a comprehensive testing strategy to ensure system reliability and code quality.
-* **Backend Testing**: We utilize **xUnit/NUnit** for the **.NET 10.0 Web API** to verify Domain entities and Application use cases.
-* **Frontend Testing**: We utilize **Karma/Jasmine** for the **Angular UI** (located in `ui/credibility-ui`) to ensure component stability.
+# 2.0 🧪 Testing Strategy
 
+## 2.1 Overview
 
-### 🎯 Coverage Goals
+The Credibility Index project implements a comprehensive testing strategy to ensure system reliability and maintain high code quality standards.
+
+## 2.2 Backend Testing
+
+- Framework: **xUnit / NUnit**
+- Target: **.NET 10.0 Web API**
+- Scope:
+  - Domain entities
+  - Application use cases
+  - Business logic validation
+
+## 2.3 Frontend Testing
+
+- Framework: **Karma / Jasmine**
+- Target: **Angular UI**
+- Location: `ui/credibility-ui`
+- Scope:
+  - Component behavior
+  - UI logic validation
+  - Rendering stability
+
+# 3.0 🎯 Coverage Goals
+
 To maintain project standards, we have established the following baseline for code quality:
-* **Overall Coverage**: Aiming for **80% coverage** across the entire solution.
-* **Critical Logic**: Aiming for **100% coverage on Domain logic** and scoring algorithms.
 
-### 📊 Test Results
-Below is the summary of the latest test execution from the CI/CD pipeline.
+## 3.1 Overall Coverage Target
+
+- **80% minimum coverage** across the entire solution.
+
+## 3.2 Critical Logic Coverage
+
+- **100% coverage** for:
+  - Domain logic
+  - Credibility scoring algorithms
+
+# 4.0 📊 Test Results
+
+## 4.1 CI/CD Pipeline Summary
 
 | Project | Tests Passed | Tests Failed | Coverage % | Status |
 | :--- | :--- | :--- | :--- | :--- |
@@ -21,68 +50,160 @@ Below is the summary of the latest test execution from the CI/CD pipeline.
 | **CredibilityIndex.Domain** | 0 | 0 | 0% | 🟡 Pending |
 | **credibility-ui** | 0 | 0 | 0% | 🟡 Pending |
 
-## 🧪 Security & Authentication Test Report
+# 5.0 🧪 Security & Authentication Test Report
 
-* **Test Date:** 2026-02-19
+## 5.1 Test Metadata
 
-* **Tester:** API Development Team
+- **Test Date:** 2026-02-19  
+- **Tester:** API Development Team  
+- **Environment:** Development (Localhost)  
+- **Target:** AdminController Endpoints 
 
-* **Environment:** Development (Localhost)
+# 6.0 Authentication & Authorization Test Cases
+## 6.1 Purpose
 
-* **Target:** AdminController Endpoints
+This section validates the authentication and authorization mechanisms implemented in the system.  
+It ensures that protected endpoints enforce:
 
-## 1. Test Case: Unauthenticated Access (401)
-* **Objective:** Verify that requests without a valid JWT are rejected.
+- OAuth 2.0 Password Grant
+- JWT Bearer authentication
+- Role-Based Access Control (RBAC)
+- OpenIddict validation middleware
 
-* **Method:** curl -i -X GET http://localhost:5149/api/admin/stats (No Header).
+---
 
-* **Requirement:** API must return 401 Unauthorized.
+## 6.2 Test Coverage Scope
 
-* **Actual Result:** HTTP/1.1 401 Unauthorized.
-```https
-WWW-Authenticate: Bearer error="invalid_token"
-```
+The following security behaviors are validated:
 
-* **Status:** ✅ PASSED
+- Token presence validation
+- Token signature validation
+- Token expiration validation
+- Role enforcement
+- Access control to protected endpoints
+- Middleware-level rejection before controller execution
 
-## 2. Test Case: Unauthorized Role Access (403)
-* **Objective:** Verify that a valid user without the "Admin" role cannot access admin data.
+---
 
-* **Method: 1.**  Login as user@test.com.
-* **Method: 2.**  Use returned token to call GET /api/admin/users.
+## 6.3 Authentication & Authorization Test Matrix
 
-* **Requirement:** API must return 403 Forbidden.
+| Test ID | Scenario | Token State | Role | Expected Status | Result |
+|----------|----------|------------|------|-----------------|--------|
+| AUTH-01 | No token provided | None | N/A | 401 Unauthorized | ✅ Passed |
+| AUTH-02 | Invalid token signature | Tampered | N/A | 401 Unauthorized | ✅ Passed |
+| AUTH-03 | Expired token | Expired | N/A | 401 Unauthorized | ✅ Passed |
+| AUTH-04 | Valid token, wrong role | Valid | User | 403 Forbidden | ✅ Passed |
+| AUTH-05 | Valid Admin token | Valid | Admin | 200 OK | ✅ Passed |
 
-* **Actual Result:** HTTP/1.1 403 Forbidden.
-```json
-{
-  "error": "Forbidden",
-  "message": "You do not have permission to access this resource."
-}
-```
-* **Status:** ✅ PASSED
+---
 
-## 3. Test Case: Authorized Admin Access (200)
-* **Objective:** Verify that a user with the "Admin" role can retrieve protected data.
+## 6.4 Detailed Test Cases
 
-* **Method: 1.**  Login as admin@credibility.com.
-  **Mehtod: 2.**  Use returned token to call GET /api/admin/stats.
+---
 
-* **Requirement:** API must return 200 OK with valid JSON payload.
+### 6.4.1 Test Case AUTH-01 — Unauthenticated Access
 
-* **Actual Result:** HTTP/1.1 200 OK.
+**Objective:**  
+Verify that requests without a JWT are rejected.
 
-* **Payload:** {"totalUsers": 5, "serverStatus": "Healthy" ...}
+**Method:**  
+Send request to a protected endpoint without `Authorization` header.
 
-* **Status:** ✅ PASSED
+**Requirement:**  
+System must return `401 Unauthorized`.
 
-## 4. Test Case: Invalid Token/Signature Rejection
-* **Objective:** Verify the middleware rejects tokens that have been tampered with.
+**Actual Result:**  
+`HTTP/1.1 401 Unauthorized`
 
-* **Method:** Manually change one character in the JWT signature and send request.
+**Status:**  
+✅ PASSED
 
-* **Requirement:** Middleware must reject the signature before reaching the controller.
+---
 
-* **Actual Result:** HTTP/1.1 401 Unauthorized.
+### 6.4.2 Test Case AUTH-02 — Invalid Token Signature
 
-* **Status:** ✅ PASSED
+**Objective:**  
+Ensure tampered JWT tokens are rejected.
+
+**Method:**  
+Modify one character in the token signature and send request.
+
+**Requirement:**  
+Middleware must reject request before controller execution.
+
+**Actual Result:**  
+`HTTP/1.1 401 Unauthorized`
+
+**Status:**  
+✅ PASSED
+
+---
+
+### 6.4.3 Test Case AUTH-03 — Expired Token
+
+**Objective:**  
+Verify expired tokens are denied access.
+
+**Method:**  
+Use a JWT past its expiration time.
+
+**Requirement:**  
+System must return `401 Unauthorized`.
+
+**Actual Result:**  
+`HTTP/1.1 401 Unauthorized`
+
+**Status:**  
+✅ PASSED
+
+---
+
+### 6.4.4 Test Case AUTH-04 — Unauthorized Role Access
+
+**Objective:**  
+Verify that a user without the `Admin` role cannot access admin endpoints.
+
+**Method:**  
+Authenticate as standard user and call `/api/admin/stats`.
+
+**Requirement:**  
+System must return `403 Forbidden`.
+
+**Actual Result:**  
+`HTTP/1.1 403 Forbidden`
+
+**Status:**  
+✅ PASSED
+
+---
+
+### 6.4.5 Test Case AUTH-05 — Authorized Admin Access
+
+**Objective:**  
+Verify that a user with the `Admin` role can access protected endpoints.
+
+**Method:**  
+Authenticate as admin and call `/api/admin/stats`.
+
+**Requirement:**  
+System must return `200 OK` with valid JSON payload.
+
+**Actual Result:**  
+`HTTP/1.1 200 OK`
+
+**Status:**  
+✅ PASSED
+
+## 6.5 Conclusion
+
+All authentication and authorization tests passed successfully.  
+The system correctly enforces:
+
+- JWT validation
+- Token integrity verification
+- Expiration enforcement
+- Role-based authorization
+- Middleware-level protection
+
+The security layer functions according to the specifications defined in the Software Design Document (SDD).
+

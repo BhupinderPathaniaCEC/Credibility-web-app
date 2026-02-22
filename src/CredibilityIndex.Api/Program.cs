@@ -99,7 +99,7 @@ builder.Services.AddSwaggerGen();
 // -------------------------
 // 7. Dependency Injection
 // -------------------------
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 
 
@@ -124,6 +124,7 @@ using (var scope = app.Services.CreateScope())
     var db = services.GetRequiredService<CredibilityDbContext>();
     await db.Database.MigrateAsync();
     await OpenIddictClientSeeder.SeedAsync(services);
+    await CategorySeeder.SeedAsync(services);
 }
 
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())

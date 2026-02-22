@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace CredibilityIndex.Infrastructure.Migrations
+namespace CredibilityIndex.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CredibilityDbContext))]
     partial class CredibilityDbContextModelSnapshot : ModelSnapshot
@@ -17,27 +17,29 @@ namespace CredibilityIndex.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.3");
 
-            modelBuilder.Entity("CredibilityIndex.Domain.Entities.UserEntity", b =>
+            modelBuilder.Entity("CredibilityIndex.Domain.Entities.Category", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("DisplayName")
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PasswordHash")
+                    b.Property<string>("Slug")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("CredibilityIndex.Infrastructure.Auth.ApplicationUser", b =>
