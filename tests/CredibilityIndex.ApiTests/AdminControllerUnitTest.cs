@@ -1,0 +1,48 @@
+using Moq;
+using Xunit;
+using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using CredibilityIndex.Api.Controllers;
+using CredibilityIndex.Infrastructure.Auth;
+
+namespace CredibilityIndex.ApiTests;
+
+public class AdminControllerTests
+{
+    private readonly Mock<UserManager<ApplicationUser>> _mockUserMgr;
+    private readonly AdminController _controller;
+
+    public AdminControllerTests()
+    {
+        // 1. Setup the same "Hollow Shell" for UserManager
+        _mockUserMgr = new Mock<UserManager<ApplicationUser>>(
+            new Mock<IUserStore<ApplicationUser>>().Object, 
+            null, null, null, null, null, null, null, null);
+
+        _controller = new AdminController(_mockUserMgr.Object);
+    }
+
+    [Fact]
+    public void GetAllUsers_ReturnsOk_WithUserList()
+    {
+        // ARRANGE: Create a fake list of users
+        var fakeUsers = new List<ApplicationUser>
+        {
+            new() { Id = "1", Email = "admin@test.com", UserName = "admin" },
+            new() { Id = "2", Email = "user@test.com", UserName = "user" }
+        }.AsQueryable(); // Convert to Queryable so the Mock accepts it
+
+        // Tell the mock: "When the controller accesses .Users, give it my fake list"
+        _mockUserMgr.Setup(x => x.Users).Returns(fakeUsers);
+
+        // ACT
+        var result = _controller.GetAllUsers();
+
+        // ASSERT
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        
+        // We check if we actually got 2 users back
+        okResult.Value.ToString().Should().Contain("TotalCount = 2");
+    }
+}

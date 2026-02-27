@@ -29,6 +29,7 @@ builder.Services.AddDbContext<CredibilityDbContext>(options =>
 // -------------------------
 // 2. Identity
 // -------------------------
+
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<CredibilityDbContext>()
     .AddDefaultTokenProviders();

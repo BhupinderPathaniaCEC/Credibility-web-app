@@ -69,6 +69,39 @@ namespace CredibilityIndex.Infrastructure.Persistence
 
             await context.Categories.AddRangeAsync(categories);
             await context.SaveChangesAsync();
+
+            // --- ADD WEBSITE SEEDING HERE ---
+            if (!context.Websites.Any())
+            {
+                // We use the Slug to find the right Category ID safely
+                var newsCat = categories.First(c => c.Slug == "news");
+                var healthCat = categories.First(c => c.Slug == "health-science");
+
+                var websites = new List<Website>
+                {
+                    new Website {
+                        Name = "BBC News",
+                        Domain = "bbc.com", // Normalized
+                        CategoryId = newsCat.Id,
+                        Description = "British Broadcasting Corporation"
+                    },
+                    new Website {
+                        Name = "World Health Organization",
+                        Domain = "who.int",
+                        CategoryId = healthCat.Id,
+                        Description = "Official WHO site"
+                    },
+                    new Website {
+                        Name = "CNN",
+                        Domain = "cnn.com",
+                        CategoryId = newsCat.Id,
+                        Description = "Cable News Network"
+                    }
+                };
+
+                await context.Websites.AddRangeAsync(websites);
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

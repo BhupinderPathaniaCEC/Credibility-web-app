@@ -89,3 +89,7 @@ dev-ui:
 dev:
 	make -j 2 dev-backend dev-ui
 
+test:
+	dotnet restore
+	dotnet test tests/CredibilityIndex.ApiTests/CredibilityIndex.ApiTests.csproj
+

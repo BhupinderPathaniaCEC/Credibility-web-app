@@ -329,3 +329,49 @@ The API adheres to standard HTTP status codes to communicate processing results:
  ``` code
  Authorization: Bearer <your-admin-token>
  ```
+# 10.0 Authorization Requirements
+    `POST /api/v1/categories`
+
+## 10.1 Requirement:
+ Authenticated
+
+## 10.2 Role:
+ Admin
+
+## 10.3 Header:
+ Authorization: Bearer <JWT_TOKEN>
+
+## 10.4 Request Specification
+
+**Request Body (JSON)**
+
+| Field       | Type    | Constraints                         | Description                                                     |
+|------------|---------|-------------------------------------|-----------------------------------------------------------------|
+| name       | string  | 3–30 chars, Required                | The display name for the category.                              |
+| slug       | string  | 3–30 chars, Required                | URL-friendly unique identifier (lowercase, hyphens).            |
+| description| string  | Max 500 chars                       | Metadata describing what content fits here.                     |
+| isActive   | boolean | Default: true                       | Set to false to hide the category immediately.                  |
+
+## 10.5 Example Request
+
+```JSON
+{
+  "name": "Artificial Intelligence",
+  "slug": "ai-news",
+  "description": "Latest updates in machine learning and neural networks.",
+  "isActive": true
+}
+```
+### 10.6 Response
+
+**Success:** `201 Created`
+
+```JSON
+{
+  "id": 105,
+  "name": "Artificial Intelligence",
+  "slug": "ai-news",
+  "description": "Latest updates in machine learning and neural networks.",
+  "isActive": true
+}
+```

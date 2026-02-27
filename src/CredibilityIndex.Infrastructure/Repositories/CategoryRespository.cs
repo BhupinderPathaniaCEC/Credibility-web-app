@@ -38,15 +38,24 @@ public class CategoryRepository : ICategoryRepository
 
 
 
-    public async Task UpdateAsync(Category category)
+   public async Task UpdateAsync(Category category)
+{
+    // Find the existing entity in the database
+    var categoryToUpdate = await _context.Categories.FindAsync(category.Id);
+
+    if (categoryToUpdate != null)
     {
-        var categoryToUpdate = await _context.Categories.FindAsync(category.Id);
-        if (categoryToUpdate != null)        {
-            categoryToUpdate.Name = category.Name;
-            categoryToUpdate.Description = category.Description;
-            await _context.SaveChangesAsync();
-        }
+        // Update the fields
+        categoryToUpdate.Name = category.Name;
+        categoryToUpdate.Description = category.Description;
+        
+        // Ensure the slug is also updated to keep URLs in sync
+        categoryToUpdate.Slug = category.Slug; 
+        
+        // EF Core tracks these changes and generates the UPDATE SQL
+        await _context.SaveChangesAsync();
     }
+}
 
     public async Task DeleteAsync(int id)
     {
