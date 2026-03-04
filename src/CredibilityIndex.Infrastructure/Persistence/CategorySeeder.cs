@@ -101,6 +101,22 @@ namespace CredibilityIndex.Infrastructure.Persistence
 
                 await context.Websites.AddRangeAsync(websites);
                 await context.SaveChangesAsync();
+
+                // create a dummy snapshot for the first site so API responses include the data
+                var first = websites.First();
+                var snapshot = new CredibilitySnapshot
+                {
+                    WebsiteId = first.Id,
+                    Score = 80,
+                    AvgAccuracy = 4.0,
+                    AvgBiasNeutrality = 3.5,
+                    AvgTransparency = 4.2,
+                    AvgSafetyTrust = 3.8,
+                    RatingCount = 100,
+                    ComputedAt = DateTime.UtcNow
+                };
+                await context.CredibilitySnapshots.AddAsync(snapshot);
+                await context.SaveChangesAsync();
             }
         }
     }

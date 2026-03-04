@@ -42,6 +42,118 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("CredibilityIndex.Domain.Entities.CredibilitySnapshot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("AvgAccuracy")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("AvgBiasNeutrality")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("AvgSafetyTrust")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("AvgTransparency")
+                        .HasColumnType("REAL");
+
+                    b.Property<DateTime>("ComputedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RatingCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte>("Score")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("WebsiteId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WebsiteId")
+                        .IsUnique();
+
+                    b.ToTable("CredibilitySnapshots");
+                });
+
+            modelBuilder.Entity("CredibilityIndex.Domain.Entities.RatingEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Accuracy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BiasNeutrality")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SafetyTrust")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Transparency")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("WebsiteId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "WebsiteId")
+                        .IsUnique();
+
+                    b.ToTable("Ratings");
+                });
+
+            modelBuilder.Entity("CredibilityIndex.Domain.Entities.Website", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Domain")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("Domain")
+                        .IsUnique();
+
+                    b.ToTable("Websites");
+                });
+
             modelBuilder.Entity("CredibilityIndex.Infrastructure.Auth.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -446,6 +558,28 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
                     b.ToTable("OpenIddictTokens", (string)null);
                 });
 
+            modelBuilder.Entity("CredibilityIndex.Domain.Entities.CredibilitySnapshot", b =>
+                {
+                    b.HasOne("CredibilityIndex.Domain.Entities.Website", "Website")
+                        .WithOne("CredibilitySnapshot")
+                        .HasForeignKey("CredibilityIndex.Domain.Entities.CredibilitySnapshot", "WebsiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Website");
+                });
+
+            modelBuilder.Entity("CredibilityIndex.Domain.Entities.Website", b =>
+                {
+                    b.HasOne("CredibilityIndex.Domain.Entities.Category", "Category")
+                        .WithMany("Websites")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -519,6 +653,16 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
                     b.Navigation("Application");
 
                     b.Navigation("Authorization");
+                });
+
+            modelBuilder.Entity("CredibilityIndex.Domain.Entities.Category", b =>
+                {
+                    b.Navigation("Websites");
+                });
+
+            modelBuilder.Entity("CredibilityIndex.Domain.Entities.Website", b =>
+                {
+                    b.Navigation("CredibilitySnapshot");
                 });
 
             modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication", b =>

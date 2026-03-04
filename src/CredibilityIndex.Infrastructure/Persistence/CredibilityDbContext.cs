@@ -14,8 +14,11 @@ public class CredibilityDbContext : IdentityDbContext<ApplicationUser>
 
     }
 
+    public DbSet<RatingEntity> Ratings { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Website> Websites { get; set; }
+    // expose snapshot table directly for convenience (used by seeding/tests)
+    public DbSet<CredibilitySnapshot> CredibilitySnapshots { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +35,16 @@ public class CredibilityDbContext : IdentityDbContext<ApplicationUser>
         // Ensure the Normalized Domain is Unique (to prevent duplicate ratings)
         entity.HasIndex(w => w.Domain).IsUnique();
         });
+
+        modelBuilder.Entity<Website>()
+        .HasOne(w => w.CredibilitySnapshot)
+        .WithOne(s => s.Website)
+        .HasForeignKey<CredibilitySnapshot>(s => s.WebsiteId)
+        .OnDelete(DeleteBehavior.Cascade); // If website is deleted, delete snapshot
+
+        // Enforces the one rating per (user, website) (upsert) requirement
+       modelBuilder.Entity<RatingEntity>()
+        .HasIndex(r => new { r.UserId, r.WebsiteId }).IsUnique();
         
     }
 }

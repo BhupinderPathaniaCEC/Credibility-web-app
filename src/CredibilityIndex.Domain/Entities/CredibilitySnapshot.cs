@@ -18,7 +18,7 @@ namespace CredibilityIndex.Domain.Entities
         public int RatingCount { get; set; }
         public DateTime ComputedAt { get; set; }
 
-        public Website Website { get; set; }
+        public Website Website { get; set; } = null!; // Eager Loading
     }
 }
 

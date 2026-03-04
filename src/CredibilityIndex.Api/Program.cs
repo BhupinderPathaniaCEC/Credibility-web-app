@@ -9,6 +9,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants.GrantTypes;
 
 using CredibilityIndex.Application.Interfaces;
 using CredibilityIndex.Infrastructure.Persistence;
+using CredibilityIndex.Infrastructure.Repositories;
 using CredibilityIndex.Infrastructure.Auth;
 using OpenIddict.Abstractions;
 using System.Security.Claims;
@@ -100,8 +101,9 @@ builder.Services.AddSwaggerGen();
 // -------------------------
 // 7. Dependency Injection
 // -------------------------
+builder.Services.AddScoped<IWebsiteRepository, WebsiteRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-
+builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 
 
 // -------------------------

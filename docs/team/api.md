@@ -74,6 +74,41 @@ JSON
   "lastUpdated": "2024-05-20T10:00:00Z"
 }
 ```
+# 4.0 🌐 Website Lookup
+
+## 4.1 GET /websites/{id}
+
+### 4.1.1 Description:
+Return detailed metadata about a single website, including its current credibility snapshot if one has been computed. Snapshot data is nullable – endpoints consuming this response should handle a null value when ratings have not yet been submitted.
+
+### 4.1.2 Auth Required:
+No
+
+### 4.1.3 Success Response (200 OK) – example:
+```json
+{
+  "id": 123,
+  "name": "Example Site",
+  "domain": "example.com",
+  "description": "A sample website",
+  "isActive": true,
+  "category": { "id": 10, "name": "News" },
+  "snapshot": {
+    "score": 75,
+    "avgAccuracy": 3.5,
+    "avgBiasNeutrality": 4.0,
+    "avgTransparency": 2.8,
+    "avgSafetyTrust": 3.9,
+    "ratingCount": 42,
+    "computedAt": "2026-02-28T12:34:56Z"
+  }
+}
+```
+
+If the website has no snapshot yet the `snapshot` field will be `null`.
+
+---
+
 # 5.0 🛡 Error Handling
 
 ## 5.1 Standard HTTP Status Codes
