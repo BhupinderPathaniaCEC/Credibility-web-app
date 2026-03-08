@@ -82,9 +82,9 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("CredibilityIndex.Domain.Entities.RatingEntity", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Accuracy")
                         .HasColumnType("INTEGER");
@@ -110,10 +110,12 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("WebsiteId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("WebsiteId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("WebsiteId");
 
                     b.HasIndex("UserId", "WebsiteId")
                         .IsUnique();
@@ -130,8 +132,18 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("display_name");
 
                     b.Property<string>("Domain")
                         .IsRequired()
@@ -143,6 +155,10 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("UrlSample")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("url_sample");
 
                     b.HasKey("Id");
 
@@ -569,6 +585,17 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
                     b.Navigation("Website");
                 });
 
+            modelBuilder.Entity("CredibilityIndex.Domain.Entities.RatingEntity", b =>
+                {
+                    b.HasOne("CredibilityIndex.Domain.Entities.Website", "Website")
+                        .WithMany("Ratings")
+                        .HasForeignKey("WebsiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Website");
+                });
+
             modelBuilder.Entity("CredibilityIndex.Domain.Entities.Website", b =>
                 {
                     b.HasOne("CredibilityIndex.Domain.Entities.Category", "Category")
@@ -663,6 +690,8 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("CredibilityIndex.Domain.Entities.Website", b =>
                 {
                     b.Navigation("CredibilitySnapshot");
+
+                    b.Navigation("Ratings");
                 });
 
             modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication", b =>

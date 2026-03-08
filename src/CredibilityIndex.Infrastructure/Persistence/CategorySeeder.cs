@@ -82,18 +82,21 @@ namespace CredibilityIndex.Infrastructure.Persistence
                     new Website {
                         Name = "BBC News",
                         Domain = "bbc.com", // Normalized
+                        DisplayName = "BBC News", // New field for display purposes
                         CategoryId = newsCat.Id,
                         Description = "British Broadcasting Corporation"
                     },
                     new Website {
                         Name = "World Health Organization",
                         Domain = "who.int",
+                        DisplayName = "WHO",
                         CategoryId = healthCat.Id,
                         Description = "Official WHO site"
                     },
                     new Website {
                         Name = "CNN",
                         Domain = "cnn.com",
+                        DisplayName = "CNN",
                         CategoryId = newsCat.Id,
                         Description = "Cable News Network"
                     }

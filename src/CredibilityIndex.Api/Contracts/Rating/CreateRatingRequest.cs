@@ -1,23 +1,27 @@
-namespace CredibilityIndex.Api.Contracts.Rating;
+using System;
+using System.ComponentModel.DataAnnotations;
 
-public class CreateRatingRequest
+namespace CredibilityIndex.Api.Contracts.Rating
 {
-    public Guid WebsiteId { get; set; }
-    public int Accuracy { get; set; }
-    public int Transparency { get; set; }
-    public int BiasNeutrality { get; set; }
-    public int SafetyTrust { get; set; }
-    public string Comment { get; set; } = "";
-}
-
-public class AutoCreateRatingRequest
+    public class CreateRatingRequest
     {
-        // CHANGED: We now accept the raw URL directly from the user's browser
         public string RawUrl { get; set; } = string.Empty; 
         
+        public int WebsiteId { get; set; }
+
+        [Range(1, 5, ErrorMessage = "Accuracy score must be between 1 and 5.")]
         public int Accuracy { get; set; }
+
+        [Range(1, 5, ErrorMessage = "Transparency score must be between 1 and 5.")]
         public int Transparency { get; set; }
+
+        [Range(1, 5, ErrorMessage = "BiasNeutrality score must be between 1 and 5.")]
         public int BiasNeutrality { get; set; }
+
+        [Range(1, 5, ErrorMessage = "SafetyTrust score must be between 1 and 5.")]
         public int SafetyTrust { get; set; }
+
+        [MaxLength(1000, ErrorMessage = "Comment cannot exceed 1000 characters.")]
         public string Comment { get; set; } = "";
     }
+}

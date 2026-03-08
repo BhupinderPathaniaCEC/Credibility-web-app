@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using CredibilityIndex.Domain.Entities;
+using CredibilityIndex.Application.Common;
 
 
 namespace CredibilityIndex.Api.Controllers
@@ -14,10 +15,12 @@ namespace CredibilityIndex.Api.Controllers
     public class RatingController : ControllerBase
     {
         private readonly IRatingRepository _ratingRepository;
+        private readonly IWebsiteRepository _websiteRepository; // NEW: Injecting Website interface
 
-        public RatingController(IRatingRepository ratingRepository)
+        public RatingController(IRatingRepository ratingRepository, IWebsiteRepository websiteRepository)
         {
             _ratingRepository = ratingRepository;
+            _websiteRepository = websiteRepository;
         }
 
         [HttpPost]
@@ -37,11 +40,33 @@ namespace CredibilityIndex.Api.Controllers
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
                 return Unauthorized(new { message = "User not authenticated or invalid ID format." });
                 
+            // 2. ACCEPTANCE CRITERIA: Prevents duplicates by normalized domain
+            var normalizedDomain = DomainUtility.NormalizeDomain(ratingRequest.RawUrl);
+            if (string.IsNullOrEmpty(normalizedDomain))
+                return BadRequest(new { message = "Invalid URL provided." });
+
+            // 3. ACCEPTANCE CRITERIA: Rating upsert creates website if missing
+            var website = await _websiteRepository.GetByNormalizedDomainAsync(normalizedDomain);
+            
+            if (website == null)
+            {
+                // ACCEPTANCE CRITERIA: Minimal metadata stored
+                website = new Website 
+                {
+                    Domain = normalizedDomain,
+                    Name = normalizedDomain, // Defaulting Name to Domain
+                    // Note: Your ER diagram uses display_name, so we map it here
+                    DisplayName = normalizedDomain, 
+                    CreatedAt = DateTime.UtcNow
+                };
+                
+                // Save the new website to the database immediately so we can link the rating to it
+                await _websiteRepository.AddAsync(website); 
+            }
 
             // 2. Prepare the Domain Entity
             var rating = new RatingEntity
             {
-                Id = Guid.NewGuid(),
                 UserId = userId,
                 WebsiteId = ratingRequest.WebsiteId,
                 Accuracy = ratingRequest.Accuracy,

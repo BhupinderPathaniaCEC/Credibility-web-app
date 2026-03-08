@@ -104,6 +104,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IWebsiteRepository, WebsiteRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
+builder.Services.AddScoped<IRatingQueryRepository, RatingQueryRepository>();
 
 
 // -------------------------

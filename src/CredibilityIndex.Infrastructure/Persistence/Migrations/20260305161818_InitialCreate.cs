@@ -113,26 +113,6 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Ratings",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    WebsiteId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Accuracy = table.Column<int>(type: "INTEGER", nullable: false),
-                    BiasNeutrality = table.Column<int>(type: "INTEGER", nullable: false),
-                    Transparency = table.Column<int>(type: "INTEGER", nullable: false),
-                    SafetyTrust = table.Column<int>(type: "INTEGER", nullable: false),
-                    Comment = table.Column<string>(type: "TEXT", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Ratings", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -244,11 +224,14 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CategoryId = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CategoryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    display_name = table.Column<string>(type: "TEXT", nullable: false),
                     Domain = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false)
+                    url_sample = table.Column<string>(type: "TEXT", nullable: true),
+                    created_at = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -305,6 +288,33 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
                     table.PrimaryKey("PK_CredibilitySnapshots", x => x.Id);
                     table.ForeignKey(
                         name: "FK_CredibilitySnapshots_Websites_WebsiteId",
+                        column: x => x.WebsiteId,
+                        principalTable: "Websites",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Ratings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    WebsiteId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Accuracy = table.Column<int>(type: "INTEGER", nullable: false),
+                    BiasNeutrality = table.Column<int>(type: "INTEGER", nullable: false),
+                    Transparency = table.Column<int>(type: "INTEGER", nullable: false),
+                    SafetyTrust = table.Column<int>(type: "INTEGER", nullable: false),
+                    Comment = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Ratings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Ratings_Websites_WebsiteId",
                         column: x => x.WebsiteId,
                         principalTable: "Websites",
                         principalColumn: "Id",
@@ -427,6 +437,11 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Ratings_WebsiteId",
+                table: "Ratings",
+                column: "WebsiteId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Websites_CategoryId",
                 table: "Websites",
                 column: "CategoryId");
@@ -475,16 +490,16 @@ namespace CredibilityIndex.Infrastructure.Persistence.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Websites");
-
-            migrationBuilder.DropTable(
                 name: "OpenIddictAuthorizations");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "Websites");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictApplications");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
         }
     }
 }

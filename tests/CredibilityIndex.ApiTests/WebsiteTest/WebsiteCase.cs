@@ -30,9 +30,9 @@ public class WebsiteRepositoryTests : IDisposable
         _context.Categories.Add(category);
 
         _context.Websites.AddRange(
-            new Website { Id = 1, Name = "BBC News", Domain = "bbc.com", CategoryId = 1 },
-            new Website { Id = 2, Name = "CNN", Domain = "cnn.com", CategoryId = 1 },
-            new Website { Id = 3, Name = "World Health", Domain = "who.int", CategoryId = 1 }
+            new Website { Id = 1, Name = "BBC News",DisplayName= "BBC News",Domain = "bbc.com", CategoryId = 1 },
+            new Website { Id = 2, Name = "CNN", Domain = "cnn.com",DisplayName= "CNN", CategoryId = 1 },
+            new Website { Id = 3, Name = "World Health", Domain = "who.int",DisplayName= "World Health", CategoryId = 1 }
         );
         _context.SaveChanges();
     }
