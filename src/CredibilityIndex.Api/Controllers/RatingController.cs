@@ -39,29 +39,27 @@ namespace CredibilityIndex.Api.Controllers
             //     return Forbid(); // or Unauthorized() depending on your flow
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
                 return Unauthorized(new { message = "User not authenticated or invalid ID format." });
-                
-            // 2. ACCEPTANCE CRITERIA: Prevents duplicates by normalized domain
+
+            // Prevents duplicates by normalized domain
             var normalizedDomain = DomainUtility.NormalizeDomain(ratingRequest.RawUrl);
             if (string.IsNullOrEmpty(normalizedDomain))
                 return BadRequest(new { message = "Invalid URL provided." });
 
-            // 3. ACCEPTANCE CRITERIA: Rating upsert creates website if missing
+            // Rating upsert creates website if missing
             var website = await _websiteRepository.GetByNormalizedDomainAsync(normalizedDomain);
-            
+
             if (website == null)
             {
-                // ACCEPTANCE CRITERIA: Minimal metadata stored
-                website = new Website 
+                website = new Website
                 {
                     Domain = normalizedDomain,
                     Name = normalizedDomain, // Defaulting Name to Domain
-                    // Note: Your ER diagram uses display_name, so we map it here
-                    DisplayName = normalizedDomain, 
+                    DisplayName = normalizedDomain,
                     CreatedAt = DateTime.UtcNow
                 };
-                
+
                 // Save the new website to the database immediately so we can link the rating to it
-                await _websiteRepository.AddAsync(website); 
+                await _websiteRepository.AddAsync(website);
             }
 
             // 2. Prepare the Domain Entity
@@ -76,34 +74,25 @@ namespace CredibilityIndex.Api.Controllers
                 Comment = ratingRequest.Comment
             };
 
-            // 3. The Repository handles the "If exists, update. If not, insert" logic
-            await _ratingRepository.UpsertRatingAsync(rating);
+            // 3. The Repository handles the DB, the Calculator handles the math
+            var snapshotEntity = await _ratingRepository.UpsertRatingAsync(rating);
 
-            // 4. Return proper DTO
-            var averageScore = await _ratingRepository.GetAverageCredibilityAsync(ratingRequest.WebsiteId);
-
-            return Ok(new CreateRatingResponse
+            // 6. Map the Domain Entity -> API Contract (DTO) to send back to Angular
+            var response = new UpdatedSnapshotResponse
             {
-                Message = "Rating processed successfully.",
-                WebsiteId = ratingRequest.WebsiteId,
-                AverageScore = averageScore,
-                ComputedAt = DateTime.UtcNow
-            });
+                WebsiteId = snapshotEntity.WebsiteId,
+                Score0to100 = snapshotEntity.Score,
+                AvgAccuracy = snapshotEntity.AvgAccuracy,
+                AvgBiasNeutrality = snapshotEntity.AvgBiasNeutrality,
+                AvgTransparency = snapshotEntity.AvgTransparency,
+                AvgSafetyTrust = snapshotEntity.AvgSafetyTrust,
+                RatingCount = snapshotEntity.RatingCount,
+                ComputedAt = snapshotEntity.ComputedAt
+            };
+
+            return Ok(response);
 
             // Find existing rating for for "userId" + "ratingRequest.WebsiteId"
-
-            /*
-            var rating = new Rating {
-                UserId = userId,
-                WebsiteId = ratingRequest.WebsiteId,
-                ...
-                ...
-                CreatedAt = DateTime.Now()
-            }
-            */
-
-
-            // return CreatedAtAction({ });
         }
     }
 }

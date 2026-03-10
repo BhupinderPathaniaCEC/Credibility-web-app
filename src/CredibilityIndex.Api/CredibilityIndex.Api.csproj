@@ -35,6 +35,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CredibilityIndex.Application\CredibilityIndex.Application.csproj" />
     <ProjectReference Include="..\CredibilityIndex.Infrastructure\CredibilityIndex.Infrastructure.csproj" />
+    <ProjectReference Include="..\CredibilityIndex.Shared\CredibilityIndex.Shared.csproj" />
   </ItemGroup>
 
 </Project>
