@@ -494,7 +494,7 @@ Returns the updated credibility snapshot after processing the rating.
 | `avgTransparency` | double | Average transparency rating (1.0–5.0) |
 | `avgSafetyTrust` | double | Average safety/trust rating (1.0–5.0) |
 | `ratingCount` | integer | Total number of ratings for this website |
-| `computedAt` | ISO 8601 datetime | Timestamp when snapshot was recalculated (UTC) |
+| `computedAt` | ISO 8601 datetime | Timestamp when snapshot was recalculated (UTC) | 
 
 ```json
 {
