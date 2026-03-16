@@ -85,9 +85,10 @@ dev-backend:
 dev-ui:
 	cd $(UI_DIR) && npm start
 
-## dev: Runs both Backend and Frontend at the same time
+## dev: Builds Angular into wwwroot and runs Backend + Frontend
 dev:
-	make -j 2 dev-backend dev-ui
+	cd $(UI_DIR) && npx ng build --output-path=../../src/CredibilityIndex.Api/wwwroot --base-href=/
+	make -j 2 dev-backend
 
 test:
 	dotnet restore

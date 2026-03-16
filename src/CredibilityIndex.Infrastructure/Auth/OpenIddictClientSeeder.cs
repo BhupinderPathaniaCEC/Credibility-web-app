@@ -43,14 +43,24 @@ public static class OpenIddictClientSeeder
             DisplayName = "MVP Client",
             Permissions =
             {
+                // Endpoints
+                OpenIddictConstants.Permissions.Endpoints.Authorization,
                 OpenIddictConstants.Permissions.Endpoints.Token,
-                OpenIddictConstants.Permissions.GrantTypes.Password,
+
+                // Grant types
+                OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
                 OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
 
+                // Scopes
                 OpenIddictConstants.Permissions.Prefixes.Scope + OpenIddictConstants.Scopes.OpenId,
                 OpenIddictConstants.Permissions.Prefixes.Scope + OpenIddictConstants.Scopes.Profile,
                 OpenIddictConstants.Permissions.Prefixes.Scope + OpenIddictConstants.Scopes.Email,
                 OpenIddictConstants.Permissions.Prefixes.Scope + OpenIddictConstants.Scopes.OfflineAccess
+            },
+            Requirements =
+            {
+                // Require Proof Key for Code Exchange (PKCE) for public clients like SPAs.
+                OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange
             }
         };
 
