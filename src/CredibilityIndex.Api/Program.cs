@@ -14,6 +14,8 @@ using CredibilityIndex.Infrastructure.Auth;
 using OpenIddict.Abstractions;
 using System.Security.Claims;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -153,8 +155,28 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 // Middleware
 // -------------------------
 app.UseHttpsRedirection();
-app.UseDefaultFiles();
-app.UseStaticFiles();
+
+// Serve Angular static files from wwwroot/browser as the web root for the SPA
+var angularRootPath = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "browser");
+if (Directory.Exists(angularRootPath))
+{
+    app.UseDefaultFiles(new DefaultFilesOptions
+    {
+        FileProvider = new PhysicalFileProvider(angularRootPath),
+        RequestPath = string.Empty
+    });
+
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(angularRootPath),
+        RequestPath = string.Empty
+    });
+}
+else
+{
+    // Fallback to default static file handling if the Angular build folder is missing
+    app.UseStaticFiles();
+}
 
 app.UseRouting();
 app.UseAuthentication();
@@ -167,6 +189,17 @@ app.MapControllers();
 app.MapRazorPages();
 
 // Fallback to SPA index.html for any unmatched routes (including "/").
-app.MapFallbackToFile("/index.html");
+if (Directory.Exists(angularRootPath))
+{
+    app.MapFallback(async context =>
+    {
+        context.Response.ContentType = "text/html";
+        await context.Response.SendFileAsync(Path.Combine(angularRootPath, "index.html"));
+    });
+}
+else
+{
+    app.MapFallbackToFile("index.html");
+}
 
 app.Run();

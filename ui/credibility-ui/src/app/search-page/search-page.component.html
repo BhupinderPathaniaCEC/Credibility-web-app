@@ -1,0 +1,72 @@
+<main class="search-shell">
+  <section class="search-card">
+    <header class="search-header">
+      <h1>Search Websites</h1>
+      <p class="subtitle">Paste any URL, we normalize it to a domain.</p>
+    </header>
+
+    <form class="search-form" (ngSubmit)="search()">
+      <div class="search-input-row">
+        <input
+          type="text"
+          class="search-input"
+          name="query"
+          [(ngModel)]="rawUrl"
+          placeholder="https://www.bbc.com/news"
+          autocomplete="off"
+        />
+        <button type="submit" class="search-button" [disabled]="!canSearch">
+          {{ loading ? 'Searching…' : 'Search' }}
+        </button>
+      </div>
+      <p class="tip">Tip: Paste any URL, we normalize to a domain.</p>
+    </form>
+
+    <section class="results" *ngIf="hasSearched">
+      <h2>Results</h2>
+
+      <p class="empty" *ngIf="!loading && !error && results.length === 0">
+        No websites found for this query.
+      </p>
+
+      <p class="error" *ngIf="error">{{ error }}</p>
+
+      <div class="result-list" *ngIf="results.length > 0">
+        <article class="result-item" *ngFor="let site of results">
+          <div class="result-main">
+            <div class="result-title-row">
+              <span class="domain">{{ site.domain }}</span>
+              <span class="category" *ngIf="site.category">({{ site.category.name }})</span>
+            </div>
+            <p class="description" *ngIf="site.description">{{ site.description }}</p>
+
+            <p class="score" *ngIf="site.snapshot as snap">
+              Score: <strong>{{ snap.score }}</strong>
+              <span class="muted">({{ snap.ratingCount }} ratings)</span>
+            </p>
+          </div>
+
+          <div class="result-actions">
+            <button type="button" class="link-button" (click)="viewDetails(site)">
+              View Details
+            </button>
+            <button type="button" class="primary-button" (click)="rate(site)">
+              Rate
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <section class="not-found">
+        <h3>Not found?</h3>
+        <p>
+          If you can't find the website you're looking for, you can create it and leave the first
+          rating.
+        </p>
+        <button type="button" class="primary-outline" (click)="createAndRate()">
+          Create &amp; rate it
+        </button>
+      </section>
+    </section>
+  </section>
+</main>

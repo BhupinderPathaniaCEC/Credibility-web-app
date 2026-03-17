@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CredibilityIndex.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CredibilityDbContext))]
-    [Migration("20260313093727_InitialCreate")]
+    [Migration("20260317085502_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
