@@ -3,20 +3,29 @@ using CredibilityIndex.Application.Common;
 using CredibilityIndex.Domain.Entities;
 using CredibilityIndex.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CredibilityIndex.Infrastructure.Repositories
 {
     public class RatingRepository : IRatingRepository
     {
         private readonly CredibilityDbContext _context;
+        private readonly IMemoryCache _cache;
 
-        public RatingRepository(CredibilityDbContext context) => _context = context;
+        public RatingRepository(CredibilityDbContext context, IMemoryCache cache)
+        {
+            _context = context;
+            _cache = cache;
+        }
 
         public async Task<RatingEntity?> GetByUserAndWebsiteAsync(Guid userId, int websiteId)
             => await _context.Ratings.FirstOrDefaultAsync(r => r.UserId == userId && r.WebsiteId == websiteId);
 
         public async Task<CredibilitySnapshot> UpsertRatingAsync(RatingEntity incomingRating)
         {
+            // This method handles both creating new ratings and updating existing ones.
+            // After any rating change, the credibility snapshot is recalculated and caches are invalidated
+            // to ensure no stale data is served to clients.
             var existingRating = await _context.Ratings
                 .FirstOrDefaultAsync(r => r.UserId == incomingRating.UserId && r.WebsiteId == incomingRating.WebsiteId);
 
@@ -45,6 +54,9 @@ namespace CredibilityIndex.Infrastructure.Repositories
             // Persist all changes immediately
             await _context.SaveChangesAsync();
 
+            // Invalidate all caches for this website to prevent stale data
+            await InvalidateSnapshotCachesAsync(incomingRating.WebsiteId);
+
             return snapshot;
         }
 
@@ -62,6 +74,20 @@ namespace CredibilityIndex.Infrastructure.Repositories
             return snapshot;
         }
 
+        private async Task InvalidateSnapshotCachesAsync(int websiteId)
+        {
+            // Invalidate both website-based and domain-based caches to ensure
+            // no stale credibility data is served after rating changes
+            _cache.Remove($"Snapshot_Website_{websiteId}");
+            
+            // Also invalidate domain cache by fetching the current domain
+            var website = await _context.Websites.FindAsync(websiteId);
+            if (website != null)
+            {
+                _cache.Remove($"Snapshot_Domain_{website.Domain}");
+            }
+        }
+
         public async Task<double> GetAverageCredibilityAsync(int websiteId)
         {
             // Minimal: Averages the 4 dimensions from your diagram
@@ -69,16 +95,34 @@ namespace CredibilityIndex.Infrastructure.Repositories
                 .Where(r => r.WebsiteId == websiteId)
                 .AverageAsync(r => (double)(r.Accuracy + r.BiasNeutrality + r.Transparency + r.SafetyTrust) / 4);
         }
-        // Add this single method inside your RatingRepository class:
         public async Task<CredibilitySnapshot?> GetSnapshotByWebsiteIdAsync(int websiteId)
         {
-            return await _context.CredibilitySnapshots
+            var cacheKey = $"Snapshot_Website_{websiteId}";
+            if (_cache.TryGetValue(cacheKey, out CredibilitySnapshot? snapshot))
+            {
+                return snapshot;
+            }
+
+            snapshot = await _context.CredibilitySnapshots
                 .FirstOrDefaultAsync(s => s.WebsiteId == websiteId);
+
+            if (snapshot != null)
+            {
+                _cache.Set(cacheKey, snapshot, TimeSpan.FromMinutes(5));
+            }
+
+            return snapshot;
         }
 
         // Add this method inside your RatingRepository class:
         public async Task<CredibilitySnapshot?> GetSnapshotByDomainAsync(string normalizedDomain)
         {
+            var cacheKey = $"Snapshot_Domain_{normalizedDomain}";
+            if (_cache.TryGetValue(cacheKey, out CredibilitySnapshot? snapshot))
+            {
+                return snapshot;
+            }
+
             // 1. Find the website by its normalized string
             var website = await _context.Websites
                 .FirstOrDefaultAsync(w => w.Domain == normalizedDomain);
@@ -87,8 +131,15 @@ namespace CredibilityIndex.Infrastructure.Repositories
                 return null; // Website doesn't exist in our system yet
 
             // 2. Return the matching snapshot using the ID we just found
-            return await _context.CredibilitySnapshots
+            snapshot = await _context.CredibilitySnapshots
                 .FirstOrDefaultAsync(s => s.WebsiteId == website.Id);
+
+            if (snapshot != null)
+            {
+                _cache.Set(cacheKey, snapshot, TimeSpan.FromMinutes(5));
+            }
+
+            return snapshot;
         }
     }
 }

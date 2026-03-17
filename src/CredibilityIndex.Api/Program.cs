@@ -106,6 +106,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add Memory Cache
+builder.Services.AddMemoryCache();
+
 // -------------------------
 // 7. Dependency Injection
 // -------------------------
