@@ -14,5 +14,7 @@ namespace CredibilityIndex.Application.Interfaces
         Task<double> GetAverageCredibilityAsync(int websiteId);
         Task<CredibilitySnapshot?> GetSnapshotByWebsiteIdAsync(int websiteId);
         Task<CredibilitySnapshot?> GetSnapshotByDomainAsync(string normalizedDomain);
+        // Fetches a specific user's rating for a specific domain
+        Task<RatingEntity?> GetUserRatingForDomainAsync(string normalizedDomain, Guid userId);
     }
 }

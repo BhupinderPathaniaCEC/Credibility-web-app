@@ -7,6 +7,7 @@ using OpenIddict.Validation.AspNetCore;
 using OpenIddict.Server;
 using static OpenIddict.Abstractions.OpenIddictConstants.GrantTypes;
 
+using System.Security.Cryptography.X509Certificates;
 using CredibilityIndex.Application.Interfaces;
 using CredibilityIndex.Infrastructure.Persistence;
 using CredibilityIndex.Infrastructure.Repositories;
@@ -16,6 +17,7 @@ using System.Security.Claims;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
+using Microsoft.AspNetCore.Server.IIS;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,10 +40,25 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders()
     .AddDefaultUI();
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
+
 // -------------------------
 // 3. OpenIddict Server + Validation
 // -------------------------
 /// Access token lifetime is configured in appsettings.json and read here & without change code
+var cert = new X509Certificate2("openiddict-cert.pfx", "SuperSecretPassword123!");
+// Register the signing certificate in DI for JWT manual creation
+builder.Services.AddSingleton(cert);
 var accessTokenLifetime = builder.Configuration.GetValue<int>("IdentitySettings:AccessTokenLifetimeMinutes");
 builder.Services.AddOpenIddict()
     .AddCore(options =>
@@ -51,33 +68,36 @@ builder.Services.AddOpenIddict()
     })
         .AddServer(options =>
         {
-         // Endpoints
-         options.SetAuthorizationEndpointUris("/connect/authorize");
-         options.SetTokenEndpointUris("/connect/token");
+            // Endpoints
+            options.SetAuthorizationEndpointUris("/connect/authorize");
+            options.SetTokenEndpointUris("/connect/token");
 
-         // Grant types
-         options.AllowAuthorizationCodeFlow();
-         options.AllowRefreshTokenFlow();
+            // Grant types
+            options.AllowAuthorizationCodeFlow();
+            options.AllowRefreshTokenFlow();
 
-         // For SPA/public clients, PKCE is strongly recommended.
-         options.RequireProofKeyForCodeExchange();
+            // For SPA/public clients, PKCE is strongly recommended.
+            options.RequireProofKeyForCodeExchange();
 
-         // Accept anonymous clients (no confidential client authentication enforced).
-         options.AcceptAnonymousClients();
+            // Accept anonymous clients (no confidential client authentication enforced).
+            options.AcceptAnonymousClients();
 
-         // Development signing & encryption credentials
-         options.AddDevelopmentEncryptionCertificate()
-             .AddDevelopmentSigningCertificate();
+            //  // Development signing & encryption credentials
+            //  options.AddDevelopmentEncryptionCertificate()
+            //      .AddDevelopmentSigningCertificate();
 
-         // In production, use a real certificate or other secure method to store keys
-         options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
+            options.AddEncryptionCertificate(cert)
+           .AddSigningCertificate(cert);
 
-         options.UseAspNetCore()
-             .EnableAuthorizationEndpointPassthrough()
-             .EnableTokenEndpointPassthrough()
-             .DisableTransportSecurityRequirement();
+            // In production, use a real certificate or other secure method to store keys
+            options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
 
-         options.RegisterScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.OfflineAccess);
+            options.UseAspNetCore()
+                .EnableAuthorizationEndpointPassthrough()
+                .EnableTokenEndpointPassthrough()
+                .DisableTransportSecurityRequirement();
+
+            options.RegisterScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.OfflineAccess);
         })
     .AddValidation(options =>
     {
@@ -120,6 +140,19 @@ builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingQueryRepository, RatingQueryRepository>();
 
 
+
+// Add this in builder.Services section (before var app = builder.Build())
+// builder.Services.Configure<IISServerOptions>(options =>
+// {
+//     options.AllowSynchronousIO = true;
+// });
+
+// THIS is the actual fix for dots in route segments:
+builder.Services.Configure<RouteOptions>(options =>
+{
+    options.ConstraintMap["domainConstraint"] = typeof(string);
+});
+
 // -------------------------
 // Build App
 // -------------------------
@@ -129,7 +162,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    try 
+    try
     {
         await OpenIddictClientSeeder.SeedAsync(services);
     }
@@ -156,6 +189,11 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 // -------------------------
 app.UseHttpsRedirection();
 
+app.UseRouting();
+app.UseCors("AllowAngular");
+app.UseAuthentication();
+app.UseAuthorization();
+
 // Serve Angular static files from wwwroot/browser as the web root for the SPA
 var angularRootPath = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "browser");
 if (Directory.Exists(angularRootPath))
@@ -177,10 +215,6 @@ else
     // Fallback to default static file handling if the Angular build folder is missing
     app.UseStaticFiles();
 }
-
-app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
 
 // -------------------------
 // Map Controllers & Identity UI (Razor Pages)

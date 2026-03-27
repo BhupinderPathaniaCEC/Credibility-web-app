@@ -87,7 +87,7 @@ dev-ui:
 
 ## dev: Builds Angular into wwwroot and runs Backend + Frontend
 dev:
-	cd $(UI_DIR) && npx ng build --output-path=../../src/CredibilityIndex.Api/wwwroot --base-href=/
+	cd $(UI_DIR) && npx ng build --base-href=/
 	make -j 2 dev-backend
 
 test:
