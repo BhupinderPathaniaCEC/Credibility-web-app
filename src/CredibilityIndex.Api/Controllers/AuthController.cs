@@ -17,7 +17,7 @@ using CredibilityIndex.Api.Contracts.Auth;
 namespace CredibilityIndex.Api.Controllers
 {
     [ApiController]
-    [Route("api/auth")]
+    [Route("api/v1/auth")]
     public class AuthController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;

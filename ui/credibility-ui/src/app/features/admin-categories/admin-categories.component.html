@@ -1,0 +1,43 @@
+<div class="admin-container">
+  <div class="header-actions">
+    <h2>Admin: Categories</h2>
+    <button class="primary-button" (click)="toggleAddMode()">+ Add Category</button>
+  </div>
+
+  <div *ngIf="showForm" class="category-form">
+    <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()">
+      <input type="text" formControlName="name" placeholder="Category Name" />
+      <input type="text" formControlName="slug" placeholder="Slug (e.g., news-portal)" />
+      <button type="submit">Save</button>
+      <button type="button" (click)="toggleAddMode()">Cancel</button>
+    </form>
+  </div>
+
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Slug</th>
+        <th>Active</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let cat of categories">
+        <td>{{ cat.name }}</td>
+        <td>{{ cat.slug }}</td>
+        <td>
+          <span [class.active-badge]="cat.isActive" [class.inactive-badge]="!cat.isActive">
+            {{ cat.isActive ? 'Yes' : 'No' }}
+          </span>
+        </td>
+        <td>
+          <button (click)="editCategory(cat)">Edit</button>
+          <button (click)="disableCategory(cat.id)">
+            {{ cat.isActive ? 'Disable' : 'Enable' }}
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

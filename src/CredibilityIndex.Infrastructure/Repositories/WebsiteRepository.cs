@@ -73,6 +73,18 @@ public class WebsiteRepository : IWebsiteRepository
         return await _context.Websites
             .FirstOrDefaultAsync(w => w.Domain == normalizedDomain);
     }
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 
-    
+    public async Task<IEnumerable<Website>> GetAllWithCategoriesAsync()
+    {
+        // The .Include() tells EF Core to grab the linked Category data too!
+        return await _context.Websites
+            .Include(w => w.Category)
+            .ToListAsync();
+    }
+
+
 }

@@ -188,3 +188,194 @@ We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for:
 - Pull request workflow  
 - Branching strategy  
 - Commit message conventions
+
+# Admin Cleanup Approach - Implementation Guide
+
+## Overview
+
+The Admin Cleanup Approach allows admins to manually manage website categorization with validation and error handling. This document outlines the architecture and usage.
+
+## Features
+
+### 1. **Dropdown Category Selection**
+- Admin can select a category from a dropdown for any website
+- Only valid categories are available
+- Disabled during validation to prevent duplicate submissions
+
+### 2. **Validation & Cleanup**
+- **Pre-validation**: Checks if the selected category exists
+- **Category Assignment**: Updates the website's category
+- **Error Removal**: Automatically clears error states on success
+
+### 3. **Visual Feedback**
+- **Status Badges**: Pending, Validating, Success, Error
+- **Error Messages**: Displays what went wrong
+- **Statistics Panel**: Shows count of pending, validating, success, and error states
+
+### 4. **Error Management**
+- **Individual Error Removal**: Click "×" button next to error to clear it
+- **Batch Clear**: "Clear All" button removes all error states at once
+- **Auto-clear Success**: Success states automatically clear after 3 seconds
+
+## Architecture
+
+### Components
+
+#### AdminDashboardComponent
+Main UI component that displays:
+- Website list with current categories
+- Dropdown to select new category
+- Status and error messages
+- Statistics summary
+
+**Key Methods:**
+- `onCategorySelect()`: Handles category selection
+- `removeError()`: Removes error state for a website  
+- `clearAllErrors()`: Clears all errors at once
+- `getCleanupState()`: Retrieves cleanup status
+
+#### AdminCleanupService
+Service handling business logic:
+- Website and category data fetching
+- Validation logic
+- State management using RxJS BehaviorSubject
+- Error handling
+
+**Key Methods:**
+- `validateAndCleanupWebsite()`: Main validation-cleanup workflow
+- `removeError()`: Clears error state
+- `clearAllErrors()`: Batch error cleanup
+
+### State Management
+
+Uses RxJS BehaviorSubject for cleanup states:
+
+```typescript
+interface CleanupState {
+  websiteId: string;
+  status: 'pending' | 'validating' | 'success' | 'error';
+  message?: string;
+}
+```
+
+**States:**
+- **pending**: No action taken
+- **validating**: Category validation in progress
+- **success**: Category assigned successfully
+- **error**: Category assignment failed
+
+## Workflow
+
+```
+1. Admin selects category from dropdown
+   ↓
+2. validateAndCleanupWebsite() initiates
+   ↓
+3. Status: 'validating'
+   ↓
+4. Validate category exists
+   ├─ Success → Update website category
+   │  ├─ Success → Status: 'success'
+   │  │           Auto-clear after 3s
+   │  └─ Fail → Status: 'error'
+   │           Show error message
+   └─ Fail → Status: 'error'
+              Show "Invalid category" message
+   ↓
+5. Admin can:
+   - Remove single error (× button)
+   - Clear all errors
+   - Try again with different category
+```
+
+## Minimal Error Removal Approach
+
+The implementation follows a minimal error removal strategy:
+
+1. **No Auto-Retry**: Users must manually attempt again
+2. **Clear State Only**: Removes UI state without data modification
+3. **Non-Destructive**: Doesn't delete or modify website data
+4. **User Control**: Admin decides when to clear errors
+
+## API Endpoints Used
+
+- `GET /api/v1/admin/websites` - Fetch all websites with categories
+- `GET /api/v1/categories` - Fetch available categories
+- `GET /api/v1/categories/{id}` - Validate category exists
+- `PUT /api/v1/admin/websites/{id}/category` - Update website category
+
+## UI/UX Details
+
+### Statistics Panel
+Shows real-time count of:
+- Pending: No action yet
+- Validating: In-progress operations
+- Cleaned: Successfully categorized
+- Errors: Failed operations
+
+### Color Coding
+- **Gray**: Pending
+- **Yellow**: Validating
+- **Green**: Success
+- **Red**: Error
+
+### Responsive Design
+- Mobile-friendly table with scrolling
+- Touch-friendly buttons
+- Clear visual hierarchy
+
+## Example Usage
+
+```typescript
+// In component
+onCategorySelect(websiteId: string, event: any) {
+  const categoryId = event.target.value;
+  
+  // Trigger validation and cleanup
+  this.cleanupService.validateAndCleanupWebsite(websiteId, categoryId)
+    .subscribe({
+      next: () => this.loadData(), // Refresh on success
+      error: (err) => console.error('Cleanup failed:', err)
+    });
+}
+
+// Remove individual error
+removeError(websiteId: string) {
+  this.cleanupService.removeError(websiteId);
+}
+
+// Clear all errors with confirmation
+clearAllErrors() {
+  if (confirm('Clear all error states?')) {
+    this.cleanupService.clearAllErrors();
+  }
+}
+```
+
+## Future Enhancements
+
+1. **Batch Operations**: Select multiple websites and bulk assign categories
+2. **Undo Functionality**: Revert last category change
+3. **History Log**: Track who changed categories and when
+4. **AI Suggestions**: Recommend categories based on domain analysis
+5. **Notifications**: Toast/snackbar notifications instead of alerts
+
+## Testing Checklist
+
+- [ ] Load all websites successfully
+- [ ] Load all categories successfully
+- [ ] Select category and validate assignment
+- [ ] Display success status and auto-clear
+- [ ] Trigger error (invalid category) and show error
+- [ ] Remove individual error
+- [ ] Clear all errors
+- [ ] Refresh data after successful assignment
+- [ ] Responsive on mobile devices
+
+## Security Considerations
+
+- Admin role required (enforced server-side)
+- HTTPS for API communication
+- CSRF protection on PUT requests
+- Input validation on category IDs
+- Audit logging for admin actions (recommended)

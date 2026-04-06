@@ -142,6 +142,14 @@ namespace CredibilityIndex.Infrastructure.Repositories
             return snapshot;
         }
 
+        public async Task<IEnumerable<RatingEntity>> GetMyRatingsAsync(Guid userId)
+        {
+            // Just fetch the raw data and include the Website details
+            return await _context.Ratings
+                .Include(r => r.Website)
+                .Where(r => r.UserId == userId)
+                .ToListAsync();
+        }
         public async Task<RatingEntity?> GetUserRatingForDomainAsync(string normalizedDomain, Guid userId)
         {
             // We use Entity Framework to look inside the Ratings table, 
@@ -151,6 +159,12 @@ namespace CredibilityIndex.Infrastructure.Repositories
                 .FirstOrDefaultAsync(r =>
                     r.UserId == userId &&
                     r.Website.Domain == normalizedDomain);
+        }
+
+         public async Task SaveChangesAsync()
+        {
+            // Simply pass the save command down to the database context
+            await _context.SaveChangesAsync();
         }
     }
 }

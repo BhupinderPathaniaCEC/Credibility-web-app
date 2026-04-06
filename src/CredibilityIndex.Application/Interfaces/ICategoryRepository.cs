@@ -17,4 +17,7 @@ public interface ICategoryRepository
     Task DeleteAsync(int id);
 
     Task<bool> ToggleStatusAsync(int id);
+
+    Task<Category?> GetByNameAsync(string name);
+    Task SaveChangesAsync();
 }

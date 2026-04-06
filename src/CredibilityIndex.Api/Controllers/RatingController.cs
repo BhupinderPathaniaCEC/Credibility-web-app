@@ -16,11 +16,13 @@ namespace CredibilityIndex.Api.Controllers
     {
         private readonly IRatingRepository _ratingRepository;
         private readonly IWebsiteRepository _websiteRepository; // NEW: Injecting Website interface
+        private readonly ICategoryRepository _categoryRepository; // NEW: Injecting Category interface
 
-        public RatingController(IRatingRepository ratingRepository, IWebsiteRepository websiteRepository)
+        public RatingController(IRatingRepository ratingRepository, IWebsiteRepository websiteRepository, ICategoryRepository categoryRepository)
         {
             _ratingRepository = ratingRepository;
             _websiteRepository = websiteRepository;
+            _categoryRepository = categoryRepository;
         }
 
         // --- THE MATH HELPER ---
@@ -43,15 +45,53 @@ namespace CredibilityIndex.Api.Controllers
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
                 return Unauthorized();
 
-            var normalizedDomain = DomainUtility.NormalizeDomain(decodedDomain);
-
             // You will need to make sure your repository has a method to get a single user's rating by domain
             var existingRating = await _ratingRepository.GetUserRatingForDomainAsync(normalizedDomain, userId);
 
             if (existingRating == null)
-                return NotFound(); // Angular expects this 404 if they haven't rated it yet!
+            {
+                // Returning Ok(null) or NoContent() tells Angular this is a SUCCESS, 
+                // the data is just completely empty!
+                return NoContent();
+            }
 
             return Ok(existingRating);
+        }
+
+        [HttpGet("/api/v1/me/ratings")]
+        [Authorize]
+        public async Task<IActionResult> GetMyRatingsDashboard()
+        {
+            var userIdString = User.FindFirst(Claims.Subject)?.Value
+                            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user token." });
+            }
+
+            // 1. Get the raw entities from the repository
+            var rawRatings = await _ratingRepository.GetMyRatingsAsync(userId);
+
+            // 2. Handle the empty state
+            if (rawRatings == null || !rawRatings.Any())
+            {
+                return Ok(new List<MyRatingResponse>());
+            }
+
+            // 3. Map the entities to the Contract and calculate the math right here!
+            var responseList = rawRatings.Select(r => new MyRatingResponse
+            {
+                WebsiteId = r.WebsiteId,
+                Domain = r.Website.Domain, // This works because of .Include(r => r.Website)
+                Accuracy = r.Accuracy,
+                BiasNeutrality = r.BiasNeutrality,
+                Transparency = r.Transparency,
+                SafetyTrust = r.SafetyTrust,
+                PersonalAverageScore = (r.Accuracy + r.BiasNeutrality + r.Transparency + r.SafetyTrust) / 4.0
+            });
+
+            return Ok(responseList);
         }
 
         // --- THE GET ENDPOINT ---
@@ -88,7 +128,6 @@ namespace CredibilityIndex.Api.Controllers
         {
             var decodedDomain = Uri.UnescapeDataString(domain);
             var normalizedDomain = DomainUtility.NormalizeDomain(decodedDomain);
-            var normalizedDomain = DomainUtility.NormalizeDomain(decodedDomain);
             if (string.IsNullOrEmpty(normalizedDomain))
                 return BadRequest(new { message = "Invalid domain format." });
 
@@ -117,71 +156,99 @@ namespace CredibilityIndex.Api.Controllers
         [Authorize]
         public async Task<IActionResult> SubmitRating(string domain, [FromBody] CreateRatingRequest ratingRequest)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
 
-            // Prefer the OpenID Connect "sub" (subject) claim
-            var userIdString =
-                User.FindFirst(Claims.Subject)?.Value               // OpenIddict/OIDC "sub"
-                ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value; // Fallback
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            // if (string.IsNullOrWhiteSpace(userId))
-            //     return Forbid(); // or Unauthorized() depending on your flow
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
-                return Unauthorized(new { message = "User not authenticated or invalid ID format." });
+                // Prefer the OpenID Connect "sub" (subject) claim
+                var userIdString =
+                    User.FindFirst(Claims.Subject)?.Value               // OpenIddict/OIDC "sub"
+                    ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value; // Fallback
 
-            // Prevents duplicates by normalized domain
-            var normalizedDomain = DomainUtility.NormalizeDomain(domain);
-            if (string.IsNullOrEmpty(normalizedDomain))
-                return BadRequest(new { message = "Invalid URL provided." });
+                // if (string.IsNullOrWhiteSpace(userId))
+                //     return Forbid(); // or Unauthorized() depending on your flow
+                if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+                    return Unauthorized(new { message = "User not authenticated or invalid ID format." });
 
-            // Rating upsert creates website if missing
-            var website = await _websiteRepository.GetByNormalizedDomainAsync(normalizedDomain);
+                // Prevents duplicates by normalized domain
+                var normalizedDomain = DomainUtility.NormalizeDomain(domain);
+                if (string.IsNullOrEmpty(normalizedDomain))
+                    return BadRequest(new { message = "Invalid URL provided." });
 
+                // Rating upsert creates website if missing
+                var website = await _websiteRepository.GetByNormalizedDomainAsync(normalizedDomain);
+
+                // 1. The Business Logic: Auto-create website if missing
             if (website == null)
             {
+                var defaultCategory = await _categoryRepository.GetByNameAsync("Uncategorized");
+                
+                // If it doesn't exist, we rely on the repository to handle creation, 
+                // or we create it here and save.
+                if (defaultCategory == null)
+                {
+                    defaultCategory = new Category { Name = "Uncategorized", Slug = "uncategorized", IsActive = true };
+                    await _categoryRepository.AddAsync(defaultCategory);
+                    await _categoryRepository.SaveChangesAsync(); // Assuming a SaveChanges method exists
+                }
+
                 website = new Website
                 {
                     Domain = normalizedDomain,
-                    Name = normalizedDomain, // Defaulting Name to Domain
+                    Name = normalizedDomain,
                     DisplayName = normalizedDomain,
+                    CategoryId = defaultCategory.Id,
                     CreatedAt = DateTime.UtcNow
                 };
 
-                // Save the new website to the database immediately so we can link the rating to it
                 await _websiteRepository.AddAsync(website);
+                await _websiteRepository.SaveChangesAsync(); // MUST save to get the ID
             }
 
-            // 2. Prepare the Domain Entity
-            var rating = new RatingEntity
+                // 2. Prepare the Domain Entity
+                var rating = new RatingEntity
+                {
+                    UserId = userId,
+                    // Website = website, // Link the whole entity for EF Core to handle the FK
+                    WebsiteId = website.Id,
+                    Accuracy = ratingRequest.Accuracy,
+                    BiasNeutrality = ratingRequest.BiasNeutrality,
+                    Transparency = ratingRequest.Transparency,
+                    SafetyTrust = ratingRequest.SafetyTrust,
+                    Comment = ratingRequest.Comment
+                };
+
+                // 3. The Repository handles the DB, the Calculator handles the math
+                var snapshotEntity = await _ratingRepository.UpsertRatingAsync(rating);
+
+                // 6. Map the Domain Entity -> API Contract (DTO) to send back to Angular
+                var response = new UpdatedSnapshotResponse
+                {
+                    WebsiteId = snapshotEntity.WebsiteId,
+                    Score0to100 = snapshotEntity.Score,
+                    AvgAccuracy = snapshotEntity.AvgAccuracy,
+                    AvgBiasNeutrality = snapshotEntity.AvgBiasNeutrality,
+                    AvgTransparency = snapshotEntity.AvgTransparency,
+                    AvgSafetyTrust = snapshotEntity.AvgSafetyTrust,
+                    RatingCount = snapshotEntity.RatingCount,
+                    ComputedAt = snapshotEntity.ComputedAt,
+                    ConfidenceScore = CalculateConfidenceScore(snapshotEntity.RatingCount) // Confidence
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
             {
-                UserId = userId,
-                WebsiteId = website.Id,
-                Accuracy = ratingRequest.Accuracy,
-                BiasNeutrality = ratingRequest.BiasNeutrality,
-                Transparency = ratingRequest.Transparency,
-                SafetyTrust = ratingRequest.SafetyTrust,
-                Comment = ratingRequest.Comment
-            };
-
-            // 3. The Repository handles the DB, the Calculator handles the math
-            var snapshotEntity = await _ratingRepository.UpsertRatingAsync(rating);
-
-            // 6. Map the Domain Entity -> API Contract (DTO) to send back to Angular
-            var response = new UpdatedSnapshotResponse
-            {
-                WebsiteId = snapshotEntity.WebsiteId,
-                Score0to100 = snapshotEntity.Score,
-                AvgAccuracy = snapshotEntity.AvgAccuracy,
-                AvgBiasNeutrality = snapshotEntity.AvgBiasNeutrality,
-                AvgTransparency = snapshotEntity.AvgTransparency,
-                AvgSafetyTrust = snapshotEntity.AvgSafetyTrust,
-                RatingCount = snapshotEntity.RatingCount,
-                ComputedAt = snapshotEntity.ComputedAt,
-                ConfidenceScore = CalculateConfidenceScore(snapshotEntity.RatingCount) // Confidence
-            };
-
-            return Ok(response);
+                // THIS IS THE MAGIC! It will print the exact database crash to your browser
+                return StatusCode(500, new
+                {
+                    error = ex.Message,
+                    innerError = ex.InnerException?.Message,
+                    stackTrace = ex.StackTrace
+                });
+            }
 
             // Find existing rating for for "userId" + "ratingRequest.WebsiteId"
         }
