@@ -85,67 +85,63 @@ if (!builder.Environment.IsEnvironment("Testing"))
     builder.Services.AddSingleton(cert);
 }
 
-builder.Services.AddOpenIddict()
-    .AddCore(options =>
-    {
-        options.UseEntityFrameworkCore()
-               .UseDbContext<CredibilityDbContext>();
-    })
-        .AddServer(options =>
+// Only configure OpenIddict in non-Testing environments
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddOpenIddict()
+        .AddCore(options =>
         {
-            // Endpoints
-            options.SetAuthorizationEndpointUris("/connect/authorize");
-            options.SetTokenEndpointUris("/connect/token");
-            options.SetRevocationEndpointUris("/connect/revoke");
-
-            // Grant types
-            options.AllowAuthorizationCodeFlow();
-            options.AllowRefreshTokenFlow();
-            options.AllowPasswordFlow();
-
-            // For SPA/public clients, PKCE is strongly recommended.
-            options.RequireProofKeyForCodeExchange();
-
-            // Accept anonymous clients (no confidential client authentication enforced).
-            options.AcceptAnonymousClients();
-
-            // Use development certificates in Testing environment
-            if (builder.Environment.IsEnvironment("Testing"))
+            options.UseEntityFrameworkCore()
+                   .UseDbContext<CredibilityDbContext>();
+        })
+            .AddServer(options =>
             {
-                options.AddDevelopmentEncryptionCertificate()
-                    .AddDevelopmentSigningCertificate();
-            }
-            else
-            {
+                // Endpoints
+                options.SetAuthorizationEndpointUris("/connect/authorize");
+                options.SetTokenEndpointUris("/connect/token");
+                options.SetRevocationEndpointUris("/connect/revoke");
+
+                // Grant types
+                options.AllowAuthorizationCodeFlow();
+                options.AllowRefreshTokenFlow();
+                options.AllowPasswordFlow();
+
+                // For SPA/public clients, PKCE is strongly recommended.
+                options.RequireProofKeyForCodeExchange();
+
+                // Accept anonymous clients (no confidential client authentication enforced).
+                options.AcceptAnonymousClients();
+
+                // Use production certificates
                 options.AddEncryptionCertificate(cert)
                     .AddSigningCertificate(cert);
-            }
 
-            // In production, use a real certificate or other secure method to store keys
-            options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
-            options.UseReferenceRefreshTokens();
+                // In production, use a real certificate or other secure method to store keys
+                options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
+                options.UseReferenceRefreshTokens();
 
-            options.UseAspNetCore()
-                .EnableAuthorizationEndpointPassthrough()
-                .EnableTokenEndpointPassthrough()
-                .DisableTransportSecurityRequirement();
+                options.UseAspNetCore()
+                    .EnableAuthorizationEndpointPassthrough()
+                    .EnableTokenEndpointPassthrough()
+                    .DisableTransportSecurityRequirement();
 
-            options.RegisterScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.OfflineAccess);
-        })
-    .AddValidation(options =>
+                options.RegisterScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.OfflineAccess);
+            })
+        .AddValidation(options =>
+        {
+            options.UseLocalServer();
+            options.UseAspNetCore();
+        });
+
+    // -------------------------
+    // 4. Authentication (Production)
+    // -------------------------
+    builder.Services.AddAuthentication(options =>
     {
-        options.UseLocalServer();
-        options.UseAspNetCore();
+        options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
     });
-
-// -------------------------
-// 4. Authentication
-// -------------------------
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-});
+}
 
 builder.Services.AddAuthorization();
 
