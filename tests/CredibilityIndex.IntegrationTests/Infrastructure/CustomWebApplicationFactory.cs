@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using CredibilityIndex.Infrastructure.Persistence;
 using System.Security.Cryptography.X509Certificates;
+using System.Reflection;
 
 namespace CredibilityIndex.IntegrationTests;
 
@@ -12,8 +13,11 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        // Set the content root to the test directory so it can find the certificate
-        builder.UseContentRoot("/home/bhupinderpathania/code/Credibility-web-app/tests/CredibilityIndex.IntegrationTests/bin/Debug/net10.0");
+        // Set the content root dynamically to the API project directory
+        // Navigate from test assembly location: .../tests/bin/Debug/net10.0 -> .../src/CredibilityIndex.Api
+        var testAssemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? AppContext.BaseDirectory;
+        var contentRoot = Path.GetFullPath(Path.Combine(testAssemblyLocation, "..", "..", "..", "..", "src", "CredibilityIndex.Api"));
+        builder.UseContentRoot(contentRoot);
 
         builder.ConfigureAppConfiguration((context, config) =>
         {
