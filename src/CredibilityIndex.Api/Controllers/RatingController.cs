@@ -99,7 +99,7 @@ namespace CredibilityIndex.Api.Controllers
         }
 
         // --- THE GET ENDPOINT ---
-        [HttpGet("{websiteId}/credibility")]
+        [HttpGet("id/{websiteId}/credibility")]
         [AllowAnonymous]
         public async Task<IActionResult> GetWebsiteCredibility(int websiteId)
         {

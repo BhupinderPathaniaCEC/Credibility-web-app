@@ -13,9 +13,16 @@ public static class OpenIddictClientSeeder
         string[] roles = { "Admin", "User" };
         foreach (var role in roles)
         {
-            if (!await roleManager.RoleExistsAsync(role))
+            if (await roleManager.FindByNameAsync(role) == null)
             {
-                await roleManager.CreateAsync(new IdentityRole(role));
+                try
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
+                catch (Exception)
+                {
+                    // Ignore if role already exists
+                }
             }
         }
         var adminEmail = "admin@credibility.com";
@@ -68,11 +75,22 @@ public static class OpenIddictClientSeeder
         var existing = await manager.FindByClientIdAsync(descriptor.ClientId);
         if (existing is null)
         {
-            await manager.CreateAsync(descriptor);
-            return;
+            try
+            {
+                await manager.CreateAsync(descriptor);
+                return;
+            }
+            catch (Exception)
+            {
+                // If create fails, try to find and update
+                existing = await manager.FindByClientIdAsync(descriptor.ClientId);
+            }
         }
 
-        await manager.UpdateAsync(existing, descriptor);
+        if (existing != null)
+        {
+            await manager.UpdateAsync(existing, descriptor);
+        }
 
         // Register Angular SPA as a public client for authorization code/PKCE flows.
         var spaDescriptor = new OpenIddictApplicationDescriptor
@@ -116,7 +134,14 @@ public static class OpenIddictClientSeeder
         var existingSpa = await manager.FindByClientIdAsync(spaDescriptor.ClientId);
         if (existingSpa is null)
         {
-            await manager.CreateAsync(spaDescriptor);
+            try
+            {
+                await manager.CreateAsync(spaDescriptor);
+            }
+            catch (Exception)
+            {
+                // Ignore if already exists
+            }
         }
         else
         {

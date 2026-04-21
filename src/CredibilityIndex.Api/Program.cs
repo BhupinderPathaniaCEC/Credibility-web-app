@@ -186,17 +186,16 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
+        var db = services.GetRequiredService<CredibilityDbContext>();
+        await db.Database.MigrateAsync();
         await OpenIddictClientSeeder.SeedAsync(services);
+        await CategorySeeder.SeedAsync(services);
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred seeding the DB.");
     }
-    var db = services.GetRequiredService<CredibilityDbContext>();
-    await db.Database.MigrateAsync();
-    await OpenIddictClientSeeder.SeedAsync(services);
-    await CategorySeeder.SeedAsync(services);
 }
 
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
