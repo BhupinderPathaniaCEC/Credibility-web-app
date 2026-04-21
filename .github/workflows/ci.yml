@@ -4,9 +4,9 @@ name: .NET Core CI
 # It runs every time you push to the 'main' branch or open a Pull Request.
 on:
   push:
-    branches: [ "main" ]
+    branches:
   pull_request:
-    branches: [ "main" ]
+    branches:
 
 jobs:
   build-and-test:
@@ -26,7 +26,7 @@ jobs:
 
     # 5. Restores all your NuGet packages
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore 
 
     # 6. Builds the Application and Test projects
     - name: Build Project
