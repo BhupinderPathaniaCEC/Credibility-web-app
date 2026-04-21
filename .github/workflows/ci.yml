@@ -4,9 +4,9 @@ name: .NET Core CI
 # It runs every time you push to the 'main' branch or open a Pull Request.
 on:
   push:
-    branches:
+    branches: [ "Sprint-9/Wrok-Completed/Task" ]
   pull_request:
-    branches:
+    branches: [ "Sprint-9/Wrok-Completed/Task" ]
 
 jobs:
   build-and-test:
