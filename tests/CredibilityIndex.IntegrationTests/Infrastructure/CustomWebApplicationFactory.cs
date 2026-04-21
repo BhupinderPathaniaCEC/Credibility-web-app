@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using CredibilityIndex.Infrastructure.Persistence;
 using System.Security.Cryptography.X509Certificates;
 
@@ -10,12 +11,21 @@ namespace CredibilityIndex.IntegrationTests;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        // Walk up from bin/Debug/net10.0 (3 levels) + tests/CredibilityIndex.IntegrationTests (2 levels)
+        // = 5 levels up from AppContext.BaseDirectory to reach repo root
+        var apiContentRoot = Path.GetFullPath(
+            Path.Combine(AppContext.BaseDirectory, 
+            "../../../../../src/CredibilityIndex.Api")
+        );
+        
+        builder.UseContentRoot(apiContentRoot);
+        return base.CreateHost(builder);
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        // Use solution-relative content root to correctly resolve from any machine/CI environment
-        // This resolves to the actual CredibilityIndex.Api project directory
-        builder.UseSolutionRelativeContentRoot("src/CredibilityIndex.Api");
-
         builder.ConfigureAppConfiguration((context, config) =>
         {
             // Override the connection string to use a test SQLite database file
