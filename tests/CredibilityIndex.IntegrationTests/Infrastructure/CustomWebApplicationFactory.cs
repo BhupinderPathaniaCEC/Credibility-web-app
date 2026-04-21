@@ -13,6 +13,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override IHost CreateHost(IHostBuilder builder)
     {
+        // Set environment to "Testing" to disable HTTPS and certificate loading
+        builder.UseEnvironment("Testing");
+        
         // Walk up from bin/Debug/net10.0 (3 levels) + tests/CredibilityIndex.IntegrationTests (2 levels)
         // = 5 levels up from AppContext.BaseDirectory to reach repo root
         var apiContentRoot = Path.GetFullPath(

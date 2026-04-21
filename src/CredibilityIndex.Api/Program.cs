@@ -74,10 +74,16 @@ builder.Services.AddCors(options =>
 // 3. OpenIddict Server + Validation
 // -------------------------
 /// Access token lifetime is configured in appsettings.json and read here & without change code
-var cert = new X509Certificate2("openiddict-cert.pfx", "SuperSecretPassword123!");
-// Register the signing certificate in DI for JWT manual creation
-builder.Services.AddSingleton(cert);
 var accessTokenLifetime = builder.Configuration.GetValue<int>("IdentitySettings:AccessTokenLifetimeMinutes");
+
+// Only load the certificate in non-Testing environments
+X509Certificate2? cert = null;
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    cert = new X509Certificate2("openiddict-cert.pfx", "SuperSecretPassword123!");
+    // Register the signing certificate in DI for JWT manual creation
+    builder.Services.AddSingleton(cert);
+}
 
 builder.Services.AddOpenIddict()
     .AddCore(options =>
@@ -103,12 +109,17 @@ builder.Services.AddOpenIddict()
             // Accept anonymous clients (no confidential client authentication enforced).
             options.AcceptAnonymousClients();
 
-            //  // Development signing & encryption credentials
-            //  options.AddDevelopmentEncryptionCertificate()
-            //      .AddDevelopmentSigningCertificate();
-
-            options.AddEncryptionCertificate(cert)
-           .AddSigningCertificate(cert);
+            // Use development certificates in Testing environment
+            if (builder.Environment.IsEnvironment("Testing"))
+            {
+                options.AddDevelopmentEncryptionCertificate()
+                    .AddDevelopmentSigningCertificate();
+            }
+            else
+            {
+                options.AddEncryptionCertificate(cert)
+                    .AddSigningCertificate(cert);
+            }
 
             // In production, use a real certificate or other secure method to store keys
             options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
@@ -209,7 +220,12 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 // Middleware
 // -------------------------
 app.UseMiddleware<CorrelationIdMiddleware>();
-app.UseHttpsRedirection();
+
+// Only use HTTPS redirection when not in Testing environment
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseRouting();
 app.UseCors("AllowAngular");
