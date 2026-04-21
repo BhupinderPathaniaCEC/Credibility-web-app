@@ -30,8 +30,8 @@ jobs:
 
     # 6. Builds the Application and Test projects
     - name: Build Project
-      run: dotnet build --no-restore
+      run: dotnet build 
 
     # 7. THE MAGIC: Runs your Unit and Integration tests!
     - name: Run Tests
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test 
