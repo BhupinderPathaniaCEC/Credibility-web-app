@@ -39,8 +39,8 @@ export class SearchPageComponent {
   error: string | null = null;
   hasSearched = false;
 
-  constructor(private readonly http: HttpClient, 
-    private readonly router: Router) {}
+  constructor(private readonly http: HttpClient,
+    private readonly router: Router) { }
 
   get canSearch(): boolean {
     return this.rawUrl.trim().length > 0 && !this.loading;
@@ -81,14 +81,30 @@ export class SearchPageComponent {
   }
 
   rate(result: WebsiteSearchResult): void {
-    const returnUrl = encodeURIComponent(`/rate/${encodeURIComponent(result.domain)}`);
-    window.location.href = `/Identity/Account/Login?returnUrl=${returnUrl}`;
+    const ratingURL = encodeURIComponent(`/rate/${encodeURIComponent(result.domain)}`);
+    if (localStorage.getItem('access_token')) {
+      this.router.navigate(['/rate', result.domain]);
+    } else {
+      window.location.href = `/Identity/Account/Login?returnUrl=${ratingURL}`;
+    }
   }
 
   createAndRate(): void {
     const current = this.rawUrl.trim();
-    const target = current ? `/rate/new?url=${encodeURIComponent(current)}` : '/rate/new';
+    if (!current) return; // Don't navigate if empty
+
+    // Encode the website the user typed (e.g., "google.com")
+    const encodedUrl = encodeURIComponent(current);
+
+    // The target URL should now be /rate/google.com
+    const target = `/rate/${encodedUrl}`;
     const returnUrl = encodeURIComponent(target);
-    window.location.href = `/Identity/Account/Login?returnUrl=${returnUrl}`;
+
+    if (localStorage.getItem('access_token')) {
+      // NAVIGATE TO THE ACTUAL DOMAIN, NOT "new"
+      this.router.navigate(['/rate', current]);
+    } else {
+      window.location.href = `/Identity/Account/Login?returnUrl=${returnUrl}`;
+    }
   }
 }

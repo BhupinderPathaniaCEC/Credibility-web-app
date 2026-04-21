@@ -6,6 +6,7 @@ using System.Security.Claims;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using CredibilityIndex.Domain.Entities;
 using CredibilityIndex.Application.Common;
+using Microsoft.Extensions.Logging;
 
 
 namespace CredibilityIndex.Api.Controllers
@@ -17,12 +18,15 @@ namespace CredibilityIndex.Api.Controllers
         private readonly IRatingRepository _ratingRepository;
         private readonly IWebsiteRepository _websiteRepository; // NEW: Injecting Website interface
         private readonly ICategoryRepository _categoryRepository; // NEW: Injecting Category interface
+        private readonly ILogger<RatingController> _logger;
 
-        public RatingController(IRatingRepository ratingRepository, IWebsiteRepository websiteRepository, ICategoryRepository categoryRepository)
+        public RatingController(IRatingRepository ratingRepository, IWebsiteRepository websiteRepository, ICategoryRepository categoryRepository, ILogger<RatingController> logger)
         {
             _ratingRepository = ratingRepository;
             _websiteRepository = websiteRepository;
             _categoryRepository = categoryRepository;
+            _logger = logger;
+
         }
 
         // --- THE MATH HELPER ---
@@ -156,6 +160,9 @@ namespace CredibilityIndex.Api.Controllers
         [Authorize]
         public async Task<IActionResult> SubmitRating(string domain, [FromBody] CreateRatingRequest ratingRequest)
         {
+
+            _logger.LogInformation("Testing logs for {Domain}", domain);
+
             try
             {
 
@@ -198,7 +205,9 @@ namespace CredibilityIndex.Api.Controllers
                 {
                     Domain = normalizedDomain,
                     Name = normalizedDomain,
-                    DisplayName = normalizedDomain,
+                    DisplayName = !string.IsNullOrWhiteSpace(ratingRequest.DisplayName) 
+                        ? ratingRequest.DisplayName 
+                        : normalizedDomain,
                     CategoryId = defaultCategory.Id,
                     CreatedAt = DateTime.UtcNow
                 };
@@ -248,6 +257,7 @@ namespace CredibilityIndex.Api.Controllers
                     innerError = ex.InnerException?.Message,
                     stackTrace = ex.StackTrace
                 });
+                
             }
 
             // Find existing rating for for "userId" + "ratingRequest.WebsiteId"

@@ -5,12 +5,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using CredibilityIndex.Api.Controllers;
 using CredibilityIndex.Infrastructure.Auth;
+using CredibilityIndex.Application.Interfaces;
 
 namespace CredibilityIndex.ApiTests;
 
 public class AdminControllerTests
 {
     private readonly Mock<UserManager<ApplicationUser>> _mockUserMgr;
+    private readonly Mock<IWebsiteRepository> _mockWebsiteRepo;
+    private readonly Mock<ICategoryRepository> _mockCategoryRepo;
     private readonly AdminController _controller;
 
     public AdminControllerTests()
@@ -20,7 +23,10 @@ public class AdminControllerTests
             new Mock<IUserStore<ApplicationUser>>().Object, 
             null, null, null, null, null, null, null, null);
 
-        _controller = new AdminController(_mockUserMgr.Object);
+        _mockWebsiteRepo = new Mock<IWebsiteRepository>();
+        _mockCategoryRepo = new Mock<ICategoryRepository>();
+
+        _controller = new AdminController(_mockUserMgr.Object, _mockWebsiteRepo.Object, _mockCategoryRepo.Object);
     }
 
     [Fact]

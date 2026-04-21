@@ -34,6 +34,7 @@ export class RateWebsiteComponent implements OnInit {
 
     // Initialize the form with required validators (1-5 scale)
     this.ratingForm = this.fb.group({
+      displayName: [''],
       accuracy: [null, [Validators.required, Validators.min(1), Validators.max(5)]],
       bias: [null, [Validators.required, Validators.min(1), Validators.max(5)]],
       transparency: [null, [Validators.required, Validators.min(1), Validators.max(5)]],
@@ -108,6 +109,7 @@ export class RateWebsiteComponent implements OnInit {
 
     const raw = this.ratingForm.value;
     const payload = {
+      displayName: raw.displayName,
       accuracy: raw.accuracy,
       biasNeutrality: raw.bias,
       transparency: raw.transparency,

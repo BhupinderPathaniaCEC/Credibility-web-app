@@ -11,6 +11,7 @@ using CredibilityIndex.Api.Controllers;
 using CredibilityIndex.Api.Contracts.Auth;
 using CredibilityIndex.Infrastructure.Auth;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+using System.Security.Cryptography.X509Certificates;
 
 namespace CredibilityIndex.ApiTests
 {
@@ -19,6 +20,7 @@ namespace CredibilityIndex.ApiTests
         private readonly Mock<UserManager<ApplicationUser>> _mockUserMgr;
         private readonly Mock<SignInManager<ApplicationUser>> _mockSignInMgr;
         private readonly Mock<ILogger<AuthController>> _mockLogger;
+        private readonly X509Certificate2 _testCertificate;
         private readonly AuthController _controller;
 
         public AuthControllerTests()
@@ -37,7 +39,21 @@ namespace CredibilityIndex.ApiTests
 
             _mockLogger = new Mock<ILogger<AuthController>>();
             
-            _controller = new AuthController(_mockUserMgr.Object, _mockSignInMgr.Object, _mockLogger.Object);
+            // Create a test certificate
+            using (var rsa = System.Security.Cryptography.RSA.Create(2048))
+            {
+                var request = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                    "CN=TestCertificate",
+                    rsa,
+                    System.Security.Cryptography.HashAlgorithmName.SHA256,
+                    System.Security.Cryptography.RSASignaturePadding.Pkcs1);
+
+                _testCertificate = request.CreateSelfSigned(
+                    System.DateTimeOffset.Now.AddDays(-1),
+                    System.DateTimeOffset.Now.AddYears(1));
+            }
+            
+            _controller = new AuthController(_mockUserMgr.Object, _mockSignInMgr.Object, _mockLogger.Object, _testCertificate);
         }
 
         private void SetupControllerWithUser(string userId = "user-123", string email = "user@test.com")

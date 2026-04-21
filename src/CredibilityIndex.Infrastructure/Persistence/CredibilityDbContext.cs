@@ -11,7 +11,7 @@ public class CredibilityDbContext : IdentityDbContext<ApplicationUser>
     public CredibilityDbContext(DbContextOptions<CredibilityDbContext> options)
         : base(options)
     {
-
+        
     }
 
     public DbSet<RatingEntity> Ratings { get; set; }
