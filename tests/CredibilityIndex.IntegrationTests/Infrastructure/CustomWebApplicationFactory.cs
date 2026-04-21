@@ -33,49 +33,57 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureAppConfiguration((context, config) =>
         {
-            // Override the connection string - using in-memory database for tests
+            // Override the connection string - not needed for in-memory, but ensures clean state
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["ConnectionStrings:DefaultConnection"] = "Data Source=:memory:",
-                // Ensure OpenIddict token validation is disabled in tests
                 ["OpenIddict:DisableTokenValidation"] = "true"
             });
         });
 
         builder.ConfigureServices(services =>
         {
-            // Remove the existing DbContext registration
-            var descriptor = services.FirstOrDefault(d => d.ServiceType == typeof(DbContextOptions<CredibilityDbContext>));
-            if (descriptor != null)
+            // CRITICAL: Remove ALL existing DbContext registrations to prevent "multiple providers" error
+            // Remove DbContextOptions and DbContext service descriptors
+            var dbContextDescriptors = services
+                .Where(d => 
+                    d.ServiceType == typeof(DbContextOptions<CredibilityDbContext>) ||
+                    d.ServiceType == typeof(CredibilityDbContext) ||
+                    (d.ServiceType.IsGenericType && 
+                     d.ServiceType.Name.Contains("DbContextFactory")))
+                .ToList();
+            
+            foreach (var descriptor in dbContextDescriptors)
             {
                 services.Remove(descriptor);
             }
 
-            // Register in-memory database for testing
+            // Register in-memory database for testing (clean slate)
             services.AddDbContext<CredibilityDbContext>(options =>
             {
-                // Use in-memory database so tests don't depend on file system
                 options.UseInMemoryDatabase("TestDatabase");
                 options.UseOpenIddict();
             });
 
-            // Override authentication to use test scheme instead of OpenIddict
-            var authDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(AuthenticationSchemeOptions));
-            if (authDescriptor != null)
+            // Override authentication to use test scheme
+            var authDescriptors = services
+                .Where(d => d.ServiceType == typeof(AuthenticationSchemeOptions))
+                .ToList();
+            
+            foreach (var descriptor in authDescriptors)
             {
-                services.Remove(authDescriptor);
+                services.Remove(descriptor);
             }
 
-            // Remove OpenIddict validation and add test authentication
             services.AddAuthentication(TestAuthHandler.TestScheme)
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.TestScheme, null);
 
-            // Initialize database with test data
+            // Initialize database schema and seed if needed
             var sp = services.BuildServiceProvider();
             using (var scope = sp.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<CredibilityDbContext>();
-                db.Database.EnsureCreated(); // Create in-memory database schema
+                db.Database.EnsureCreated();
                 db.SaveChanges();
             }
         });
