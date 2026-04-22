@@ -155,7 +155,7 @@ namespace CredibilityIndex.Api.Controllers
 
             return Ok(response);
         }
-
+        [Authorize]
         [HttpPut("{domain}/ratings")]
         [Authorize]
         public async Task<IActionResult> SubmitRating(string domain, [FromBody] CreateRatingRequest ratingRequest)
