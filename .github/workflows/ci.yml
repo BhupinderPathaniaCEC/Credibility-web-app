@@ -26,7 +26,7 @@ jobs:
 
     # 5. Restores all your NuGet packages
     - name: Restore dependencies
-      run: dotnet restore // make file
+      run: dotnet restore
 
     # 6. Builds the Application and Test projects
     - name: Build Project
