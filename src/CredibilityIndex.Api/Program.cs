@@ -33,11 +33,18 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // -------------------------
-// 1. EF Core + SQLite + OpenIddict entities
+// 1. EF Core + SQLite/InMemory + OpenIddict entities
 // -------------------------
 builder.Services.AddDbContext<CredibilityDbContext>(options =>
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+    if (builder.Environment.IsEnvironment("Testing"))
+    {
+        options.UseInMemoryDatabase("TestDatabase");
+    }
+    else
+    {
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+    }
     options.UseOpenIddict(); // Enable OpenIddict entities
 });
 
@@ -82,6 +89,16 @@ if (!builder.Environment.IsEnvironment("Testing"))
 {
     cert = new X509Certificate2("openiddict-cert.pfx", "SuperSecretPassword123!");
     // Register the signing certificate in DI for JWT manual creation
+    builder.Services.AddSingleton(cert);
+}
+else
+{
+    // For testing, create a dummy certificate
+    using (var rsa = System.Security.Cryptography.RSA.Create(2048))
+    {
+        var request = new System.Security.Cryptography.X509Certificates.CertificateRequest("CN=Test", rsa, System.Security.Cryptography.HashAlgorithmName.SHA256, System.Security.Cryptography.RSASignaturePadding.Pkcs1);
+        cert = request.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(1));
+    }
     builder.Services.AddSingleton(cert);
 }
 

@@ -4,9 +4,9 @@ name: .NET Core CI
 # It runs every time you push to the 'main' branch or open a Pull Request.
 on:
   push:
-    branches: [ "Sprint-9/Wrok-Completed/Task" ]
+    branches: ["**"]
   pull_request:
-    branches: [ "Sprint-9/Wrok-Completed/Task" ]
+    branches: ["**"]
 
 jobs:
   build-and-test:
@@ -26,12 +26,13 @@ jobs:
 
     # 5. Restores all your NuGet packages
     - name: Restore dependencies
-      run: dotnet restore 
+      run: dotnet restore // make file
 
     # 6. Builds the Application and Test projects
     - name: Build Project
-      run: dotnet build 
+      run: dotnet build
 
     # 7. THE MAGIC: Runs your Unit and Integration tests!
     - name: Run Tests
       run: dotnet test 
+

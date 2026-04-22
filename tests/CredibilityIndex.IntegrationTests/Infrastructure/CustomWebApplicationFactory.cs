@@ -8,84 +8,54 @@ using Microsoft.Extensions.Hosting;
 using CredibilityIndex.Infrastructure.Persistence;
 using CredibilityIndex.IntegrationTests.Infrastructure;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Builder;
+using OpenIddict.Server;
+using OpenIddict.Abstractions;
+using OpenIddict.Server.AspNetCore;
 
 namespace CredibilityIndex.IntegrationTests;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
-    protected override IHost CreateHost(IHostBuilder builder)
-    {
-        // Set environment to "Testing" to disable HTTPS and certificate loading
-        builder.UseEnvironment("Testing");
-        
-        // Walk up from bin/Debug/net10.0 (3 levels) + tests/CredibilityIndex.IntegrationTests (2 levels)
-        // = 5 levels up from AppContext.BaseDirectory to reach repo root
-        var apiContentRoot = Path.GetFullPath(
-            Path.Combine(AppContext.BaseDirectory, 
-            "../../../../../src/CredibilityIndex.Api")
-        );
-        
-        builder.UseContentRoot(apiContentRoot);
-        return base.CreateHost(builder);
-    }
-
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration((context, config) =>
-        {
-            // Override the connection string - not needed for in-memory, but ensures clean state
-            config.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:DefaultConnection"] = "Data Source=:memory:",
-                ["OpenIddict:DisableTokenValidation"] = "true"
-            });
-        });
+        builder.UseEnvironment("Testing");
 
         builder.ConfigureServices(services =>
+{
+    // 1. Keep your DB setup
+    var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<CredibilityDbContext>));
+    if (descriptor != null) services.Remove(descriptor);
+    services.AddDbContext<CredibilityDbContext>(options => options.UseInMemoryDatabase("TestingDb"));
+
+    // 2. Add the Fake Auth Scheme
+    services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = TestAuthHandler.TestScheme;
+        options.DefaultChallengeScheme = TestAuthHandler.TestScheme;
+    })
+    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.TestScheme, options => { });
+});
+    }
+
+    private async Task SeedClientAsync(IOpenIddictApplicationManager manager)
+    {
+        if (await manager.FindByClientIdAsync("mvp-client") == null)
         {
-            // CRITICAL: Remove ALL existing DbContext registrations to prevent "multiple providers" error
-            // Remove DbContextOptions and DbContext service descriptors
-            var dbContextDescriptors = services
-                .Where(d => 
-                    d.ServiceType == typeof(DbContextOptions<CredibilityDbContext>) ||
-                    d.ServiceType == typeof(CredibilityDbContext) ||
-                    (d.ServiceType.IsGenericType && 
-                     d.ServiceType.Name.Contains("DbContextFactory")))
-                .ToList();
-            
-            foreach (var descriptor in dbContextDescriptors)
+            await manager.CreateAsync(new OpenIddictApplicationDescriptor
             {
-                services.Remove(descriptor);
-            }
-
-            // Register in-memory database for testing (clean slate)
-            services.AddDbContext<CredibilityDbContext>(options =>
-            {
-                options.UseInMemoryDatabase("TestDatabase");
-                options.UseOpenIddict();
+                ClientId = "mvp-client",
+                ClientSecret = "super-secret",
+                DisplayName = "MVP Client",
+                Permissions =
+                {
+                    OpenIddictConstants.Permissions.Endpoints.Token,
+                    OpenIddictConstants.Permissions.GrantTypes.Password,
+                    OpenIddictConstants.Permissions.Scopes.Email,
+                    OpenIddictConstants.Permissions.Scopes.Profile,
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "api"
+                }
             });
-
-            // Override authentication to use test scheme
-            var authDescriptors = services
-                .Where(d => d.ServiceType == typeof(AuthenticationSchemeOptions))
-                .ToList();
-            
-            foreach (var descriptor in authDescriptors)
-            {
-                services.Remove(descriptor);
-            }
-
-            services.AddAuthentication(TestAuthHandler.TestScheme)
-                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.TestScheme, null);
-
-            // Initialize database schema and seed if needed
-            var sp = services.BuildServiceProvider();
-            using (var scope = sp.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<CredibilityDbContext>();
-                db.Database.EnsureCreated();
-                db.SaveChanges();
-            }
-        });
+        }
     }
 }
