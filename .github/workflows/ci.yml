@@ -1,7 +1,6 @@
 name: .NET Core CI
 
 # 1. When should this run? 
-# It runs every time you push to the 'main' branch or open a Pull Request.
 on:
   push:
     branches: ["**"]
@@ -10,7 +9,7 @@ on:
 
 jobs:
   build-and-test:
-    # 2. What OS should the server run? (Ubuntu matches your WSL environment perfectly)
+    # 2. What OS should the server run?
     runs-on: ubuntu-latest
 
     steps:
@@ -24,17 +23,20 @@ jobs:
       with:
         dotnet-version: '10.0.x'
 
-    # 5. Restores all your NuGet packages
-    - name: Restore dependencies
-      run: dotnet restore
+    # 5. Installs Node.js (Required because 'make install' uses npm)
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
 
-    # 6. Builds the Application and Test projects
+    # 6. Uses your Makefile to restore NuGet and NPM packages
+    - name: Install Dependencies
+      run: make install
+
+    # 7. Uses your Makefile to build the solution
     - name: Build Project
-      run: dotnet build
+      run: make build
 
-    # 7. THE MAGIC: Runs your Unit and Integration tests!
+    # 8. Uses your Makefile to run the Unit and Integration tests
     - name: Run Tests
-      run: dotnet test 
-
-
-
+      run: make test
