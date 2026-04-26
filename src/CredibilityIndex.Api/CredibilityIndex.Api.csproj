@@ -41,4 +41,11 @@
     <ProjectReference Include="..\CredibilityIndex.Shared\CredibilityIndex.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="openiddict-cert.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

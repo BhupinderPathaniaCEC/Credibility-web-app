@@ -90,6 +90,15 @@ dev:
 	cd $(UI_DIR) && npx ng build --base-href=/
 	make -j 2 dev-backend
 
+docker-build:
+	docker build -f src/CredibilityIndex.Api/Dockerfile -t credibilityindex-api:latest .
+
+docker-up:
+	docker compose -f deploy/docker-compose.yml up -d --build
+
+docker-down:
+	docker compose -f deploy/docker-compose.yml down
+
 test:
 	dotnet restore
 	dotnet test tests/CredibilityIndex.ApiTests/CredibilityIndex.ApiTests.csproj

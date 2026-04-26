@@ -28,6 +28,7 @@ var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext() // Crucial: This picks up the "CorrelationId" from our middleware
     .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter()) // Structured JSON
+    .WriteTo.File(new Serilog.Formatting.Json.JsonFormatter(), "logs/log-.json", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -43,7 +44,16 @@ builder.Services.AddDbContext<CredibilityDbContext>(options =>
     }
     else
     {
-        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+        var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=credibility.db";
+
+        if (defaultConnection.Contains("Server=", StringComparison.OrdinalIgnoreCase) || defaultConnection.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) && defaultConnection.Contains(".db", StringComparison.OrdinalIgnoreCase) == false)
+        {
+            options.UseSqlServer(defaultConnection);
+        }
+        else
+        {
+            options.UseSqlite(defaultConnection);
+        }
     }
     options.UseOpenIddict(); // Enable OpenIddict entities
 });
