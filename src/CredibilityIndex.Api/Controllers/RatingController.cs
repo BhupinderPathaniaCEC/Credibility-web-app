@@ -31,6 +31,29 @@ namespace CredibilityIndex.Api.Controllers
             return (int)Math.Clamp(Math.Round(rawConfidence), 0, 100);
         }
 
+        [HttpGet("{domain}/ratings/me")]
+        [Authorize]
+        public async Task<IActionResult> GetMyUserRating(string domain)
+        {
+            var decodedDomain = Uri.UnescapeDataString(domain);
+            var normalizedDomain = DomainUtility.NormalizeDomain(decodedDomain);
+            var userIdString = User.FindFirst(Claims.Subject)?.Value
+                            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+                return Unauthorized();
+
+            var normalizedDomain = DomainUtility.NormalizeDomain(decodedDomain);
+
+            // You will need to make sure your repository has a method to get a single user's rating by domain
+            var existingRating = await _ratingRepository.GetUserRatingForDomainAsync(normalizedDomain, userId);
+
+            if (existingRating == null)
+                return NotFound(); // Angular expects this 404 if they haven't rated it yet!
+
+            return Ok(existingRating);
+        }
+
         // --- THE GET ENDPOINT ---
         [HttpGet("{websiteId}/credibility")]
         [AllowAnonymous]
@@ -59,11 +82,13 @@ namespace CredibilityIndex.Api.Controllers
 
         // --- THE NEW GET BY DOMAIN ENDPOINT ---
         // Fulfills the "fetch credibility by domain" user story
-        [HttpGet("/api/v1/credibility/{domain}")]
+        [HttpGet("{domain}/credibility")]
         [AllowAnonymous]
         public async Task<IActionResult> GetCredibilityByDomain(string domain)
         {
-            var normalizedDomain = DomainUtility.NormalizeDomain(domain);
+            var decodedDomain = Uri.UnescapeDataString(domain);
+            var normalizedDomain = DomainUtility.NormalizeDomain(decodedDomain);
+            var normalizedDomain = DomainUtility.NormalizeDomain(decodedDomain);
             if (string.IsNullOrEmpty(normalizedDomain))
                 return BadRequest(new { message = "Invalid domain format." });
 
@@ -82,15 +107,15 @@ namespace CredibilityIndex.Api.Controllers
                 AvgSafetyTrust = snapshotEntity.AvgSafetyTrust,
                 RatingCount = snapshotEntity.RatingCount,
                 ComputedAt = snapshotEntity.ComputedAt,
-                ConfidenceScore = CalculateConfidenceScore(snapshotEntity.RatingCount) 
+                ConfidenceScore = CalculateConfidenceScore(snapshotEntity.RatingCount)
             };
 
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPut("{domain}/ratings")]
         [Authorize]
-        public async Task<IActionResult> SubmitRating([FromBody] CreateRatingRequest ratingRequest)
+        public async Task<IActionResult> SubmitRating(string domain, [FromBody] CreateRatingRequest ratingRequest)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -106,7 +131,7 @@ namespace CredibilityIndex.Api.Controllers
                 return Unauthorized(new { message = "User not authenticated or invalid ID format." });
 
             // Prevents duplicates by normalized domain
-            var normalizedDomain = DomainUtility.NormalizeDomain(ratingRequest.RawUrl);
+            var normalizedDomain = DomainUtility.NormalizeDomain(domain);
             if (string.IsNullOrEmpty(normalizedDomain))
                 return BadRequest(new { message = "Invalid URL provided." });
 
@@ -131,7 +156,7 @@ namespace CredibilityIndex.Api.Controllers
             var rating = new RatingEntity
             {
                 UserId = userId,
-                WebsiteId = ratingRequest.WebsiteId,
+                WebsiteId = website.Id,
                 Accuracy = ratingRequest.Accuracy,
                 BiasNeutrality = ratingRequest.BiasNeutrality,
                 Transparency = ratingRequest.Transparency,

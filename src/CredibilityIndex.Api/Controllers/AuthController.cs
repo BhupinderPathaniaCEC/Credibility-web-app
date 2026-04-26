@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -26,17 +27,72 @@ namespace CredibilityIndex.Api.Controllers
         public AuthController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            X509Certificate2 signingCertificate)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _signingCertificate = signingCertificate;
         }
 
+        private readonly X509Certificate2 _signingCertificate;
+
+        // GET: api/auth/token - Issue a token for the currently authenticated user (via Identity cookie)
+        [HttpGet("token")]
+        [Authorize(AuthenticationSchemes = "Identity.Application")]
+        public async Task<IActionResult> GetToken([FromServices] IOpenIddictTokenManager tokenManager, [FromServices] IOpenIddictApplicationManager appManager)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Unauthorized();
+
+            // Build claims
+            var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, nameType: Claims.Name, roleType: Claims.Role);
+            identity.SetClaim(Claims.Subject, await _userManager.GetUserIdAsync(user));
+            identity.SetClaim(Claims.Email, user.Email);
+            identity.SetClaim(Claims.Name, user.UserName);
+            identity.SetClaim(Claims.GivenName, user.DisplayName ?? user.UserName);
+            var roles = await _userManager.GetRolesAsync(user);
+            identity.SetClaims(Claims.Role, [.. roles]);
+
+            var now = DateTime.UtcNow;
+            var expires = now.AddMinutes(60); // You can make this configurable
+
+            var claims = identity.Claims;
+
+            var signingCredentials = new Microsoft.IdentityModel.Tokens.X509SigningCredentials(_signingCertificate);
+
+            var issuer = "https://localhost:7222"; // Must match the OpenIddict server base URL and redirect URIs
+            var audience = "credibility-ui-spa"; // Use the SPA client id
+
+            // Create header with correct type for access token
+            //string issuer = null, string audience = null, IEnumerable<Claim> claims = null, DateTime? notBefore = null, DateTime? expires = null, SigningCredentials signingCredentials = null)
+
+            var header = new System.IdentityModel.Tokens.Jwt.JwtHeader(signingCredentials);
+            header["typ"] = "at+jwt";
+
+            var payload = new System.IdentityModel.Tokens.Jwt.JwtPayload(
+                issuer,
+                audience,
+                claims,
+                now,
+                expires
+            );
+
+            var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
+                header,
+                payload
+            );
+
+            var tokenString = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().WriteToken(jwt);
+            return Ok(new { access_token = tokenString });
+        }
         // POST: api/auth/register
         [HttpPost("register")]
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterRequest dto)
+
         {
             var user = new ApplicationUser
             {
@@ -115,14 +171,14 @@ namespace CredibilityIndex.Api.Controllers
             identity.SetClaim(Claims.Email, user.Email);
             identity.SetClaim(Claims.Name, user.UserName);
             identity.SetClaim(Claims.GivenName, user.DisplayName ?? user.UserName);
-            
+
             var roles = await _userManager.GetRolesAsync(user);
             identity.SetClaims(Claims.Role, [.. roles]);
-            
+
             // Set proper destinations for each claim
             identity.SetDestinations(claim => claim.Type switch
             {
-                Claims.Subject or Claims.Email or Claims.Name or Claims.GivenName or Claims.Role 
+                Claims.Subject or Claims.Email or Claims.Name or Claims.GivenName or Claims.Role
                     => new[] { Destinations.AccessToken, Destinations.IdentityToken },
                 _ => new[] { Destinations.AccessToken }
             });
@@ -132,7 +188,7 @@ namespace CredibilityIndex.Api.Controllers
 
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
-        
+
         // GET: api/auth/me - Get current user info (requires valid token)
         [HttpGet("me")]
         [Authorize]

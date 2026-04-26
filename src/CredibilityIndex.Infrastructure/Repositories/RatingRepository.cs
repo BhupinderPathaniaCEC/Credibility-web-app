@@ -79,7 +79,7 @@ namespace CredibilityIndex.Infrastructure.Repositories
             // Invalidate both website-based and domain-based caches to ensure
             // no stale credibility data is served after rating changes
             _cache.Remove($"Snapshot_Website_{websiteId}");
-            
+
             // Also invalidate domain cache by fetching the current domain
             var website = await _context.Websites.FindAsync(websiteId);
             if (website != null)
@@ -140,6 +140,17 @@ namespace CredibilityIndex.Infrastructure.Repositories
             }
 
             return snapshot;
+        }
+
+        public async Task<RatingEntity?> GetUserRatingForDomainAsync(string normalizedDomain, Guid userId)
+        {
+            // We use Entity Framework to look inside the Ratings table, 
+            // join it to the Websites table, and find the exact match.
+            return await _context.Ratings
+                .Include(r => r.Website) // Make sure we can access the Website properties
+                .FirstOrDefaultAsync(r =>
+                    r.UserId == userId &&
+                    r.Website.Domain == normalizedDomain);
         }
     }
 }

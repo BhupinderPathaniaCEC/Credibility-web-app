@@ -1,0 +1,114 @@
+<main class="details-shell">
+  <section class="details-card">
+
+    <div *ngIf="loading" class="state-container">
+      <h2>Loading data for {{ domain }}...</h2>
+    </div>
+
+    <div *ngIf="!loading && error" class="state-container error-state">
+      <h2>Error</h2>
+      <p>{{ error }}</p>
+    </div>
+
+    <div *ngIf="notFound" class="state-container not-found-state">
+      <h2>No Data Yet</h2>
+      <p>We don't have credibility data for <strong>{{ domain }}</strong> yet.</p>
+      <button class="primary-button" (click)="rateSite()">Be the first to rate it</button>
+      <!-- <button class="primary-button" [routerLink]="['/rate', domain]">Be the first to rate it</button> -->
+    </div>
+
+    <div *ngIf="!loading && !error && !notFound && websiteData && !snapshot" class="state-container not-found-state">
+      <h2>Unrated Website</h2>
+      <p><strong>{{ websiteData.name }}</strong> is in our system, but no one has reviewed it yet!</p>
+      <button class="primary-button" (click)="rateSite()">Be the first to rate it</button>
+      <!-- <button class="primary-button" [routerLink]="['/rate', domain]">Be the first to rate it</button> -->
+    </div>
+
+    <div *ngIf="!loading && !error && !notFound && websiteData && snapshot">
+      <header class="details-header">
+        <div class="header-info">
+          <h1>{{ websiteData.domain }}</h1>
+          <p class="stats">
+            Credibility Score: <strong>{{ snapshot.score }}</strong> |
+            Ratings: {{ snapshot.ratingCount }} |
+            Confidence: {{ confidenceScore }}%
+          </p>
+        </div>
+        <button class="primary-button" (click)="rateSite()">Rate this site</button>
+      </header>
+
+    </div>
+
+    <!-- <div *ngIf="notFound" class="state-container not-found-state">
+      <h2>No Data Yet</h2>
+      <p>We don't have credibility data for <strong>{{ domain }}</strong> yet.</p>
+      <button class="primary-button" (click)="rateSite()">Be the first to rate it</button>
+    </div>
+
+    <div *ngIf="!loading && !error && !notFound && websiteData">
+      <header class="details-header">
+        <div class="header-info">
+          <h1>{{ websiteData?.domain || domain }}</h1>
+          <p class="stats">
+            Credibility Score: <strong>{{ snapshot?.score }}</strong> | 
+            Ratings: {{ snapshot?.ratingCount }} | 
+            Confidence: {{ confidenceScore }}% | 
+            Last updated: {{ snapshot?.lastUpdated | date:'mediumDate' }}
+          </p>
+        </div>
+        <button class="primary-button" (click)="rateSite()">Rate this site</button>
+      </header> -->
+
+    <section class="breakdown-section">
+      <h3>Breakdown <span class="muted">(avg 1–5)</span></h3>
+
+      <div class="bar-row">
+        <span class="bar-label">Accuracy</span>
+        <div class="bar-track">
+          <div class="bar-fill accuracy" [style.width]="getBarWidth(snapshot?.avgAccuracy)"></div>
+        </div>
+        <span class="bar-value">{{ snapshot?.avgAccuracy | number:'1.1-1' }}</span>
+      </div>
+
+      <div class="bar-row">
+        <span class="bar-label">Bias/Neutrality</span>
+        <div class="bar-track">
+          <div class="bar-fill bias" [style.width]="getBarWidth(snapshot?.avgBiasNeutrality)"></div>
+        </div>
+        <span class="bar-value">{{ snapshot?.avgBiasNeutrality | number:'1.1-1' }}</span>
+      </div>
+
+      <div class="bar-row">
+        <span class="bar-label">Transparency</span>
+        <div class="bar-track">
+          <div class="bar-fill transparency" [style.width]="getBarWidth(snapshot?.avgTransparency)"></div>
+        </div>
+        <span class="bar-value">{{ snapshot?.avgTransparency | number:'1.1-1' }}</span>
+      </div>
+
+      <div class="bar-row">
+        <span class="bar-label">Safety/Trust</span>
+        <div class="bar-track">
+          <div class="bar-fill safety" [style.width]="getBarWidth(snapshot?.avgSafetyTrust)"></div>
+        </div>
+        <span class="bar-value">{{ snapshot?.avgSafetyTrust | number:'1.1-1' }}</span>
+      </div>
+    </section>
+
+    <section class="recent-ratings-section">
+      <h3>Recent Ratings</h3>
+
+      <div *ngIf="recentRatings.length === 0" class="muted">No ratings yet for this site.</div>
+
+      <ul class="rating-list" *ngIf="recentRatings.length > 0">
+        <li *ngFor="let item of recentRatings">
+          <strong class="stars">{{ getStarRating(getRatingAverage(item)) }}</strong>
+          “{{ item.comment || 'No comment provided.' }}"
+          <span class="muted">by {{ item.displayName }} ({{ formatDate(item.createdAt) }})</span>
+        </li>
+      </ul>
+
+      <button class="link-button" disabled>Load more</button>
+    </section>
+  </section>
+</main>

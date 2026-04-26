@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
 interface WebsiteCategory {
@@ -30,6 +31,7 @@ interface WebsiteSearchResult {
   templateUrl: './search-page.component.html',
   styleUrls: ['./search-page.component.css']
 })
+
 export class SearchPageComponent {
   rawUrl = '';
   results: WebsiteSearchResult[] = [];
@@ -37,7 +39,8 @@ export class SearchPageComponent {
   error: string | null = null;
   hasSearched = false;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient, 
+    private readonly router: Router) {}
 
   get canSearch(): boolean {
     return this.rawUrl.trim().length > 0 && !this.loading;
@@ -74,7 +77,7 @@ export class SearchPageComponent {
   }
 
   viewDetails(result: WebsiteSearchResult): void {
-    window.location.href = `/website/${encodeURIComponent(result.domain)}`;
+    this.router.navigate(['/website', result.domain]);
   }
 
   rate(result: WebsiteSearchResult): void {
