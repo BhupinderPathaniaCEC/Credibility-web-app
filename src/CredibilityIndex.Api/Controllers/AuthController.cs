@@ -28,7 +28,7 @@ namespace CredibilityIndex.Api.Controllers
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             ILogger<AuthController> logger,
-            X509Certificate2 signingCertificate)
+            X509Certificate2 signingCertificate = null)
         {
             _userManager = userManager;
             _signInManager = signInManager;

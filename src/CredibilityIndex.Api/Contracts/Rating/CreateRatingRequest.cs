@@ -5,7 +5,8 @@ namespace CredibilityIndex.Api.Contracts.Rating
 {
     public class CreateRatingRequest
     {
-        public string RawUrl { get; set; } = string.Empty; 
+        public string RawUrl { get; set; } = string.Empty;
+        public string? DisplayName { get; set; } = string.Empty;
         
         public int WebsiteId { get; set; }
 

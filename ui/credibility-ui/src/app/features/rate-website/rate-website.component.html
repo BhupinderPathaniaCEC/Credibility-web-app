@@ -10,7 +10,17 @@
   <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
 
   <form [formGroup]="ratingForm" (ngSubmit)="submitRating()">
-    
+
+    <div class="metric-group">
+    <label class="metric-label">Website Name (If this is a new site)</label>
+    <input 
+      type="text" 
+      formControlName="displayName" 
+      placeholder="e.g., The New York Times" 
+      class="form-input" 
+      style="width: 100%; padding: 10px; margin-bottom: 15px;"
+    />
+    </div>
     <div class="metric-group">
       <label class="metric-label">Accuracy</label>
       <div class="button-group">

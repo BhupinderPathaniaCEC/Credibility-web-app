@@ -18,16 +18,43 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Microsoft.AspNetCore.Server.IIS;
+using Serilog;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // -------------------------
-// 1. EF Core + SQLite + OpenIddict entities
+// Logging with Serilog (Structured JSON with CorrelationId enrichment)
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext() // Crucial: This picks up the "CorrelationId" from our middleware
+    .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter()) // Structured JSON
+    .WriteTo.File(new Serilog.Formatting.Json.JsonFormatter(), "logs/log-.json", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+// -------------------------
+// 1. EF Core + SQLite/InMemory + OpenIddict entities
 // -------------------------
 builder.Services.AddDbContext<CredibilityDbContext>(options =>
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+    if (builder.Environment.IsEnvironment("Testing"))
+    {
+        options.UseInMemoryDatabase("TestDatabase");
+    }
+    else
+    {
+        var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=credibility.db";
+
+        if (defaultConnection.Contains("Server=", StringComparison.OrdinalIgnoreCase) || defaultConnection.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) && defaultConnection.Contains(".db", StringComparison.OrdinalIgnoreCase) == false)
+        {
+            options.UseSqlServer(defaultConnection);
+        }
+        else
+        {
+            options.UseSqlite(defaultConnection);
+        }
+    }
     options.UseOpenIddict(); // Enable OpenIddict entities
 });
 
@@ -40,12 +67,20 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders()
     .AddDefaultUI();
 
+// Cookie Configuration (For the UI)
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    options.SlidingExpiration = true;
+    options.LogoutPath = "/Identity/Account/Logout";
+});
+
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200","https://localhost:4200")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -56,63 +91,84 @@ builder.Services.AddCors(options =>
 // 3. OpenIddict Server + Validation
 // -------------------------
 /// Access token lifetime is configured in appsettings.json and read here & without change code
-var cert = new X509Certificate2("openiddict-cert.pfx", "SuperSecretPassword123!");
-// Register the signing certificate in DI for JWT manual creation
-builder.Services.AddSingleton(cert);
 var accessTokenLifetime = builder.Configuration.GetValue<int>("IdentitySettings:AccessTokenLifetimeMinutes");
-builder.Services.AddOpenIddict()
-    .AddCore(options =>
-    {
-        options.UseEntityFrameworkCore()
-               .UseDbContext<CredibilityDbContext>();
-    })
-        .AddServer(options =>
-        {
-            // Endpoints
-            options.SetAuthorizationEndpointUris("/connect/authorize");
-            options.SetTokenEndpointUris("/connect/token");
 
-            // Grant types
-            options.AllowAuthorizationCodeFlow();
-            options.AllowRefreshTokenFlow();
-
-            // For SPA/public clients, PKCE is strongly recommended.
-            options.RequireProofKeyForCodeExchange();
-
-            // Accept anonymous clients (no confidential client authentication enforced).
-            options.AcceptAnonymousClients();
-
-            //  // Development signing & encryption credentials
-            //  options.AddDevelopmentEncryptionCertificate()
-            //      .AddDevelopmentSigningCertificate();
-
-            options.AddEncryptionCertificate(cert)
-           .AddSigningCertificate(cert);
-
-            // In production, use a real certificate or other secure method to store keys
-            options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
-
-            options.UseAspNetCore()
-                .EnableAuthorizationEndpointPassthrough()
-                .EnableTokenEndpointPassthrough()
-                .DisableTransportSecurityRequirement();
-
-            options.RegisterScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.OfflineAccess);
-        })
-    .AddValidation(options =>
-    {
-        options.UseLocalServer();
-        options.UseAspNetCore();
-    });
-
-// -------------------------
-// 4. Authentication
-// -------------------------
-builder.Services.AddAuthentication(options =>
+// Only load the certificate in non-Testing environments
+X509Certificate2? cert = null;
+if (!builder.Environment.IsEnvironment("Testing"))
 {
-    options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-});
+    cert = new X509Certificate2("openiddict-cert.pfx", "SuperSecretPassword123!");
+    // Register the signing certificate in DI for JWT manual creation
+    builder.Services.AddSingleton(cert);
+}
+else
+{
+    // For testing, create a dummy certificate
+    using (var rsa = System.Security.Cryptography.RSA.Create(2048))
+    {
+        var request = new System.Security.Cryptography.X509Certificates.CertificateRequest("CN=Test", rsa, System.Security.Cryptography.HashAlgorithmName.SHA256, System.Security.Cryptography.RSASignaturePadding.Pkcs1);
+        cert = request.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(1));
+    }
+    builder.Services.AddSingleton(cert);
+}
+
+// Only configure OpenIddict in non-Testing environments
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddOpenIddict()
+        .AddCore(options =>
+        {
+            options.UseEntityFrameworkCore()
+                   .UseDbContext<CredibilityDbContext>();
+        })
+            .AddServer(options =>
+            {
+                // Endpoints
+                options.SetAuthorizationEndpointUris("/connect/authorize");
+                options.SetTokenEndpointUris("/connect/token");
+                options.SetRevocationEndpointUris("/connect/revoke");
+
+                // Grant types
+                options.AllowAuthorizationCodeFlow();
+                options.AllowRefreshTokenFlow();
+                options.AllowPasswordFlow();
+
+                // For SPA/public clients, PKCE is strongly recommended.
+                options.RequireProofKeyForCodeExchange();
+
+                // Accept anonymous clients (no confidential client authentication enforced).
+                options.AcceptAnonymousClients();
+
+                // Use production certificates
+                options.AddEncryptionCertificate(cert)
+                    .AddSigningCertificate(cert);
+
+                // In production, use a real certificate or other secure method to store keys
+                options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
+                options.UseReferenceRefreshTokens();
+
+                options.UseAspNetCore()
+                    .EnableAuthorizationEndpointPassthrough()
+                    .EnableTokenEndpointPassthrough()
+                    .DisableTransportSecurityRequirement();
+
+                options.RegisterScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.OfflineAccess);
+            })
+        .AddValidation(options =>
+        {
+            options.UseLocalServer();
+            options.UseAspNetCore();
+        });
+
+    // -------------------------
+    // 4. Authentication (Production)
+    // -------------------------
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+    });
+}
 
 builder.Services.AddAuthorization();
 
@@ -164,17 +220,16 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
+        var db = services.GetRequiredService<CredibilityDbContext>();
+        await db.Database.MigrateAsync();
         await OpenIddictClientSeeder.SeedAsync(services);
+        await CategorySeeder.SeedAsync(services);
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred seeding the DB.");
     }
-    var db = services.GetRequiredService<CredibilityDbContext>();
-    await db.Database.MigrateAsync();
-    await OpenIddictClientSeeder.SeedAsync(services);
-    await CategorySeeder.SeedAsync(services);
 }
 
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
@@ -187,12 +242,19 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 // -------------------------
 // Middleware
 // -------------------------
-app.UseHttpsRedirection();
+app.UseMiddleware<CorrelationIdMiddleware>();
+
+// Only use HTTPS redirection when not in Testing environment
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseRouting();
 app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 // Serve Angular static files from wwwroot/browser as the web root for the SPA
 var angularRootPath = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "browser");
@@ -210,10 +272,18 @@ if (Directory.Exists(angularRootPath))
         RequestPath = string.Empty
     });
 }
-else
+// Serve default static files (includes Identity UI resources like CSS, JS)
+app.UseStaticFiles();
+
+// Serve Bootstrap from custom location
+var bootstrapPath = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "lib", "bootstrap", "dist");
+if (Directory.Exists(bootstrapPath))
 {
-    // Fallback to default static file handling if the Angular build folder is missing
-    app.UseStaticFiles();
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(bootstrapPath),
+        RequestPath = "/Identity/lib/bootstrap/dist"
+    });
 }
 
 // -------------------------
