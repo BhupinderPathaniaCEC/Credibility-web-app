@@ -24,6 +24,31 @@ public class AdminControllerTests
     }
 
     [Fact]
+    public void GetSystemStats_ReturnsOk_WithSystemInfo()
+    {
+        // ARRANGE: Create fake users
+        var fakeUsers = new List<ApplicationUser>
+        {
+            new() { Id = "1", Email = "admin@test.com", UserName = "admin" },
+            new() { Id = "2", Email = "user@test.com", UserName = "user" },
+            new() { Id = "3", Email = "another@test.com", UserName = "another" }
+        }.AsQueryable();
+
+        _mockUserMgr.Setup(x => x.Users).Returns(fakeUsers);
+
+        // ACT
+        var result = _controller.GetSystemStats();
+
+        // ASSERT
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().NotBeNull();
+        okResult.Value.ToString().Should().Contain("TotalUsers");
+        okResult.Value.ToString().Should().Contain("ServerStatus");
+        okResult.Value.ToString().Should().Contain("Healthy");
+        okResult.Value.ToString().Should().Contain("LastBackup");
+    }
+
+    [Fact]
     public void GetAllUsers_ReturnsOk_WithUserList()
     {
         // ARRANGE: Create a fake list of users
