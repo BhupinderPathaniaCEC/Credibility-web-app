@@ -1,0 +1,133 @@
+.admin-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 1rem;
+}
+
+.header-actions h2 {
+  margin: 0;
+  color: #333;
+}
+
+.primary-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.primary-button:hover {
+  background-color: #0056b3;
+}
+
+/* Form Styling */
+.category-form {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 6px;
+  margin-bottom: 2rem;
+  border: 1px solid #e9ecef;
+}
+
+.category-form form {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.category-form input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  flex: 1;
+}
+
+.category-form button[type="submit"] {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.category-form button[type="button"] {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Table Styling */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table th, .admin-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.admin-table th {
+  background-color: #f4f6f8;
+  color: #555;
+  font-weight: 600;
+}
+
+.admin-table tr:hover {
+  background-color: #fcfcfc;
+}
+
+/* Status Badges */
+.active-badge, .inactive-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.active-badge {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.inactive-badge {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Action Buttons inside the table */
+.admin-table td button {
+  background-color: transparent;
+  border: 1px solid #ccc;
+  padding: 0.25rem 0.5rem;
+  margin-right: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #333;
+}
+
+.admin-table td button:hover {
+  background-color: #eee;
+}

@@ -1,1 +1,18 @@
 /* You can add global styles to this file, and also import other style files */
+/* src/styles.css */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh; /* Forces the body to be exactly the height of the screen */
+  width: 100vw;
+  overflow-x: hidden; /* Prevents horizontal scrolling */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f7f6; /* A nice default background color */
+}
+
+/* This targets the main container in your app.html */
+.content-container {
+  height: calc(100vh - 120px); /* 100vh minus the height of your header/footer */
+  overflow-y: auto; /* Only allows the content area to scroll, not the whole page */
+  padding: 2rem;
+}

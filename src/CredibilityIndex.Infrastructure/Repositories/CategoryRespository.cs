@@ -15,6 +15,22 @@ public class CategoryRepository : ICategoryRepository
         _context = context;
     }
 
+    // 1. Implement GetByNameAsync
+        public async Task<Category?> GetByNameAsync(string name)
+        {
+            // Use EF Core to find the first category that matches the name
+            // (Using ToLower() or checking the Slug is even safer if you want!)
+            return await _context.Categories
+                .FirstOrDefaultAsync(c => c.Name == name);
+        }
+
+        // 2. Implement SaveChangesAsync
+        public async Task SaveChangesAsync()
+        {
+            // Simply pass the save command down to the database context
+            await _context.SaveChangesAsync();
+        }
+
     public async Task AddAsync(Category category)
     {
         await _context.Categories.AddAsync(category);

@@ -1,0 +1,34 @@
+<div class="dashboard-container">
+  <h2>My Ratings</h2>
+
+  <div *ngIf="isLoading" class="loading-state">
+    Loading your history...
+  </div>
+
+  <div *ngIf="!isLoading && ratings.length === 0" class="empty-state">
+    <div class="empty-icon">📊</div>
+    <h3>No ratings yet!</h3>
+    <p>You haven't contributed to the Credibility Index yet. Search for a website to drop your first rating.</p>
+    <button routerLink="/" class="primary-button">Search Websites</button>
+  </div>
+
+  <div *ngIf="!isLoading && ratings.length > 0" class="ratings-list">
+    <div class="rating-card" *ngFor="let rate of ratings">
+      
+      <div class="card-info">
+        <h3>{{ rate.domain }}</h3>
+        <div class="scores">
+          <span class="global-score">Score now: <strong>({{ rate.currentGlobalScore || 'N/A' }})</strong></span>
+          <span class="separator">-</span>
+          <span class="personal-score">Your rating: <strong>{{ rate.personalAverageScore | number:'1.2-2' }}</strong></span>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button class="action-btn edit-btn" (click)="editRating(rate.domain)">[Edit]</button>
+        <button class="action-btn view-btn" (click)="viewWebsite(rate.domain)">[View]</button>
+      </div>
+
+    </div>
+  </div>
+</div>

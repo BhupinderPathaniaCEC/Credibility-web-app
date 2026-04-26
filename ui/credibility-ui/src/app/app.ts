@@ -1,11 +1,13 @@
 
 import { Component, signal, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { TokenService } from './token.service';
+import { TokenService } from './core/auth/token.service';
+import { HeaderComponent } from './core/layout/header/header.component';
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, HeaderComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

@@ -16,5 +16,6 @@ namespace CredibilityIndex.Application.Interfaces
         Task<CredibilitySnapshot?> GetSnapshotByDomainAsync(string normalizedDomain);
         // Fetches a specific user's rating for a specific domain
         Task<RatingEntity?> GetUserRatingForDomainAsync(string normalizedDomain, Guid userId);
+        Task<IEnumerable<RatingEntity>> GetMyRatingsAsync(Guid userId);
     }
 }

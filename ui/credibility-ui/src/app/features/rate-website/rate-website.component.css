@@ -1,0 +1,81 @@
+.rating-container {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-family: sans-serif;
+}
+
+.metric-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.metric-label {
+  width: 150px;
+  font-weight: bold;
+}
+
+.button-group button {
+  margin-right: 5px;
+  padding: 8px 12px;
+  border: 1px solid #aaa;
+  background: #f9f9f9;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+/* THIS MAKES THE BUTTON LOOK "SELECTED" */
+.button-group button.selected {
+  background-color: #007bff;
+  color: white;
+  border-color: #0056b3;
+  font-weight: bold;
+}
+
+.selection-text {
+  margin-left: 15px;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.comment-group {
+  align-items: flex-start;
+}
+
+.comment-box {
+  flex-grow: 1;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #aaa;
+}
+
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-submit {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-submit:disabled {
+  background-color: #94d3a2;
+  cursor: not-allowed;
+}
+
+.alert {
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+}
+.success { background-color: #d4edda; color: #155724; }
+.error { background-color: #f8d7da; color: #721c24; }

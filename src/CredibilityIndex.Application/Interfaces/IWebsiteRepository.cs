@@ -10,4 +10,6 @@ public interface IWebsiteRepository
     Task AddAsync(Website website);
     // Task<Website> GetOrCreateWebsiteForRatingAsync(string rawUrl);
     Task<Website?> GetByIdAsync(int id);
+    Task SaveChangesAsync();
+    Task<IEnumerable<Website>> GetAllWithCategoriesAsync();
 }

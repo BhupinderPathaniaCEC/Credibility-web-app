@@ -1,0 +1,17 @@
+<nav class="navbar">
+  <div class="brand">Credibility Index</div>
+  
+  <div class="nav-links">
+    <a routerLink="/search" class="nav-btn">Search</a>
+
+    <ng-container *ngIf="!isLoggedIn">
+      <a href="/Identity/Account/Login" class="nav-btn">Login</a>
+      <a href="/Identity/Account/Register" class="nav-btn outline">Register</a>
+    </ng-container>
+
+    <ng-container *ngIf="isLoggedIn">
+      <a routerLink="/me/ratings" class="nav-btn primary">My Ratings</a> 
+      <button (click)="logout()" class="nav-btn danger">Logout</button>
+    </ng-container>
+  </div>
+</nav>

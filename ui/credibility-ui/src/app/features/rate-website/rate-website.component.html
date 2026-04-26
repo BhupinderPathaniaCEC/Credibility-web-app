@@ -1,0 +1,80 @@
+<!-- <div style="padding: 50px; background-color: #f0f0f0;">
+  <h1 style="color: red;">THE COMPONENT IS ALIVE!</h1>
+  <h2>Domain: {{ domain }}</h2>
+  <button (click)="submitRating()" style="padding: 10px; font-size: 20px;">Force Submit Test</button>
+</div> -->
+<div class="rating-container" *ngIf="!loading">
+  <h2>Rate: {{ domain }}</h2>
+
+  <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <form [formGroup]="ratingForm" (ngSubmit)="submitRating()">
+    
+    <div class="metric-group">
+      <label class="metric-label">Accuracy</label>
+      <div class="button-group">
+        <button type="button" *ngFor="let val of ratingScale"
+                [class.selected]="ratingForm.get('accuracy')?.value === val"
+                (click)="setRating('accuracy', val)">
+          {{ val }}
+        </button>
+      </div>
+      <span class="selection-text">(selected: {{ ratingForm.get('accuracy')?.value || 'none' }})</span>
+    </div>
+
+    <div class="metric-group">
+      <label class="metric-label">Bias/Neutrality</label>
+      <div class="button-group">
+        <button type="button" *ngFor="let val of ratingScale"
+                [class.selected]="ratingForm.get('bias')?.value === val"
+                (click)="setRating('bias', val)">
+          {{ val }}
+        </button>
+      </div>
+      <span class="selection-text">(selected: {{ ratingForm.get('bias')?.value || 'none' }})</span>
+    </div>
+
+    <div class="metric-group">
+      <label class="metric-label">Transparency</label>
+      <div class="button-group">
+        <button type="button" *ngFor="let val of ratingScale"
+                [class.selected]="ratingForm.get('transparency')?.value === val"
+                (click)="setRating('transparency', val)">
+          {{ val }}
+        </button>
+      </div>
+      <span class="selection-text">(selected: {{ ratingForm.get('transparency')?.value || 'none' }})</span>
+    </div>
+
+    <div class="metric-group">
+      <label class="metric-label">Safety/Trust</label>
+      <div class="button-group">
+        <button type="button" *ngFor="let val of ratingScale"
+                [class.selected]="ratingForm.get('safety')?.value === val"
+                (click)="setRating('safety', val)">
+          {{ val }}
+        </button>
+      </div>
+      <span class="selection-text">(selected: {{ ratingForm.get('safety')?.value || 'none' }})</span>
+    </div>
+
+    <div class="metric-group comment-group">
+      <label class="metric-label">Comment (optional)</label>
+      <textarea formControlName="comment" rows="3" class="comment-box"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-submit" [disabled]="ratingForm.invalid || isSubmitting">
+        {{ isSubmitting ? 'Submitting...' : 'Submit Rating' }}
+      </button>
+      <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
+    </div>
+    
+    <p class="note-text">Note: You can update your rating anytime.</p>
+  </form>
+</div>
+
+<div class="loading-container" *ngIf="loading">
+  <p>Loading rating data...</p>
+</div>
