@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
 using OpenIddict.Validation.AspNetCore;
 using OpenIddict.Server;
 using static OpenIddict.Abstractions.OpenIddictConstants.GrantTypes;
@@ -97,7 +98,11 @@ var accessTokenLifetime = builder.Configuration.GetValue<int>("IdentitySettings:
 X509Certificate2? cert = null;
 if (!builder.Environment.IsEnvironment("Testing"))
 {
-    cert = new X509Certificate2("openiddict-cert.pfx", "SuperSecretPassword123!");
+    cert = X509CertificateLoader.LoadPkcs12FromFile(
+        "openiddict-cert.pfx",
+        "SuperSecretPassword123!",
+        X509KeyStorageFlags.DefaultKeySet,
+        Pkcs12LoaderLimits.Defaults);
     // Register the signing certificate in DI for JWT manual creation
     builder.Services.AddSingleton(cert);
 }
