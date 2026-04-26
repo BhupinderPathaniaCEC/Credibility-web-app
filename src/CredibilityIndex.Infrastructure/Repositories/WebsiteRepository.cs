@@ -26,6 +26,7 @@ public class WebsiteRepository : IWebsiteRepository
         // Search in both Name and the normalized Domain
         return await _context.Websites
             .Include(w => w.Category) // Ensure metadata is included
+            .Include(w => w.CredibilitySnapshot) // Include snapshot for search summaries
             .Where(w => w.Domain.Contains(normalizedQuery) ||
                         w.Name.ToLower().Contains(query.ToLower()))
             .ToListAsync();

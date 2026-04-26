@@ -12,5 +12,7 @@ namespace CredibilityIndex.Api.Contracts.Rating
         public double AvgSafetyTrust { get; set; }
         public int RatingCount { get; set; }
         public DateTime ComputedAt { get; set; }
+
+        public int ConfidenceScore { get; set; }
     }
 }

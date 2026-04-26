@@ -14,6 +14,8 @@ using CredibilityIndex.Infrastructure.Auth;
 using OpenIddict.Abstractions;
 using System.Security.Claims;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,12 +30,13 @@ builder.Services.AddDbContext<CredibilityDbContext>(options =>
 });
 
 // -------------------------
-// 2. Identity
+// 2. Identity + UI
 // -------------------------
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<CredibilityDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddDefaultUI();
 
 // -------------------------
 // 3. OpenIddict Server + Validation
@@ -46,30 +49,36 @@ builder.Services.AddOpenIddict()
         options.UseEntityFrameworkCore()
                .UseDbContext<CredibilityDbContext>();
     })
-    .AddServer(options =>
-    {
-        options.SetTokenEndpointUris("/connect/token");
-        
-        // Register grant types explicitly
-        options.AllowPasswordFlow();
-        options.AllowRefreshTokenFlow();
-        
-        // Accept anonymous clients (allows client_id/client_secret without pre-registration validation)
-        options.AcceptAnonymousClients();
+        .AddServer(options =>
+        {
+         // Endpoints
+         options.SetAuthorizationEndpointUris("/connect/authorize");
+         options.SetTokenEndpointUris("/connect/token");
 
-        //Development signing & encryption credentials
-        options.AddDevelopmentEncryptionCertificate()
-               .AddDevelopmentSigningCertificate();
-        
-        // In production, use a real certificate or other secure method to store keys
-        options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
+         // Grant types
+         options.AllowAuthorizationCodeFlow();
+         options.AllowRefreshTokenFlow();
 
-        options.UseAspNetCore()
-               .EnableTokenEndpointPassthrough()
-               .DisableTransportSecurityRequirement();
+         // For SPA/public clients, PKCE is strongly recommended.
+         options.RequireProofKeyForCodeExchange();
 
-        options.RegisterScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.OfflineAccess);
-    })
+         // Accept anonymous clients (no confidential client authentication enforced).
+         options.AcceptAnonymousClients();
+
+         // Development signing & encryption credentials
+         options.AddDevelopmentEncryptionCertificate()
+             .AddDevelopmentSigningCertificate();
+
+         // In production, use a real certificate or other secure method to store keys
+         options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
+
+         options.UseAspNetCore()
+             .EnableAuthorizationEndpointPassthrough()
+             .EnableTokenEndpointPassthrough()
+             .DisableTransportSecurityRequirement();
+
+         options.RegisterScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.OfflineAccess);
+        })
     .AddValidation(options =>
     {
         options.UseLocalServer();
@@ -88,15 +97,19 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 // -------------------------
-// 5. Controllers
+// 5. Controllers + Razor Pages (Identity UI)
 // -------------------------
 builder.Services.AddControllers();
+builder.Services.AddRazorPages();
 
 // -------------------------
 // 6. Swagger / Swashbuckle
 // -------------------------
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add Memory Cache
+builder.Services.AddMemoryCache();
 
 // -------------------------
 // 7. Dependency Injection
@@ -142,15 +155,51 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 // Middleware
 // -------------------------
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+// Serve Angular static files from wwwroot/browser as the web root for the SPA
+var angularRootPath = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "browser");
+if (Directory.Exists(angularRootPath))
+{
+    app.UseDefaultFiles(new DefaultFilesOptions
+    {
+        FileProvider = new PhysicalFileProvider(angularRootPath),
+        RequestPath = string.Empty
+    });
+
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(angularRootPath),
+        RequestPath = string.Empty
+    });
+}
+else
+{
+    // Fallback to default static file handling if the Angular build folder is missing
+    app.UseStaticFiles();
+}
 
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
 // -------------------------
-// Map Controllers
+// Map Controllers & Identity UI (Razor Pages)
 // -------------------------
 app.MapControllers();
+app.MapRazorPages();
+
+// Fallback to SPA index.html for any unmatched routes (including "/").
+if (Directory.Exists(angularRootPath))
+{
+    app.MapFallback(async context =>
+    {
+        context.Response.ContentType = "text/html";
+        await context.Response.SendFileAsync(Path.Combine(angularRootPath, "index.html"));
+    });
+}
+else
+{
+    app.MapFallbackToFile("index.html");
+}
 
 app.Run();

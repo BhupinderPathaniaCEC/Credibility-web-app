@@ -23,6 +23,71 @@ namespace CredibilityIndex.Api.Controllers
             _websiteRepository = websiteRepository;
         }
 
+        // --- THE MATH HELPER ---
+        // Fulfills the "Confidence increases as ratingCount grows" criteria
+        private int CalculateConfidenceScore(int ratingCount)
+        {
+            double rawConfidence = ((double)ratingCount / (ratingCount + 10.0)) * 100.0;
+            return (int)Math.Clamp(Math.Round(rawConfidence), 0, 100);
+        }
+
+        // --- THE GET ENDPOINT ---
+        [HttpGet("{websiteId}/credibility")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetWebsiteCredibility(int websiteId)
+        {
+            var snapshotEntity = await _ratingRepository.GetSnapshotByWebsiteIdAsync(websiteId);
+
+            if (snapshotEntity == null)
+                return NotFound(new { message = "No ratings found for this website yet." });
+
+            var response = new UpdatedSnapshotResponse
+            {
+                WebsiteId = snapshotEntity.WebsiteId,
+                Score0to100 = snapshotEntity.Score,
+                AvgAccuracy = snapshotEntity.AvgAccuracy,
+                AvgBiasNeutrality = snapshotEntity.AvgBiasNeutrality,
+                AvgTransparency = snapshotEntity.AvgTransparency,
+                AvgSafetyTrust = snapshotEntity.AvgSafetyTrust,
+                RatingCount = snapshotEntity.RatingCount,
+                ComputedAt = snapshotEntity.ComputedAt,
+                ConfidenceScore = CalculateConfidenceScore(snapshotEntity.RatingCount) // Apply Math
+            };
+
+            return Ok(response);
+        }
+
+        // --- THE NEW GET BY DOMAIN ENDPOINT ---
+        // Fulfills the "fetch credibility by domain" user story
+        [HttpGet("/api/v1/credibility/{domain}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetCredibilityByDomain(string domain)
+        {
+            var normalizedDomain = DomainUtility.NormalizeDomain(domain);
+            if (string.IsNullOrEmpty(normalizedDomain))
+                return BadRequest(new { message = "Invalid domain format." });
+
+            var snapshotEntity = await _ratingRepository.GetSnapshotByDomainAsync(normalizedDomain);
+
+            if (snapshotEntity == null)
+                return NotFound(new { message = $"No credibility data found for {normalizedDomain}." });
+
+            var response = new UpdatedSnapshotResponse
+            {
+                WebsiteId = snapshotEntity.WebsiteId,
+                Score0to100 = snapshotEntity.Score,
+                AvgAccuracy = snapshotEntity.AvgAccuracy,
+                AvgBiasNeutrality = snapshotEntity.AvgBiasNeutrality,
+                AvgTransparency = snapshotEntity.AvgTransparency,
+                AvgSafetyTrust = snapshotEntity.AvgSafetyTrust,
+                RatingCount = snapshotEntity.RatingCount,
+                ComputedAt = snapshotEntity.ComputedAt,
+                ConfidenceScore = CalculateConfidenceScore(snapshotEntity.RatingCount) 
+            };
+
+            return Ok(response);
+        }
+
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> SubmitRating([FromBody] CreateRatingRequest ratingRequest)
@@ -87,7 +152,8 @@ namespace CredibilityIndex.Api.Controllers
                 AvgTransparency = snapshotEntity.AvgTransparency,
                 AvgSafetyTrust = snapshotEntity.AvgSafetyTrust,
                 RatingCount = snapshotEntity.RatingCount,
-                ComputedAt = snapshotEntity.ComputedAt
+                ComputedAt = snapshotEntity.ComputedAt,
+                ConfidenceScore = CalculateConfidenceScore(snapshotEntity.RatingCount) // Confidence
             };
 
             return Ok(response);

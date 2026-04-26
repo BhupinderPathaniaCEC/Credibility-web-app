@@ -12,5 +12,7 @@ namespace CredibilityIndex.Application.Interfaces
         // 2. Your existing methods (updated to use Guid to match your Entities/DB)
         Task<RatingEntity?> GetByUserAndWebsiteAsync(Guid userId, int websiteId);
         Task<double> GetAverageCredibilityAsync(int websiteId);
+        Task<CredibilitySnapshot?> GetSnapshotByWebsiteIdAsync(int websiteId);
+        Task<CredibilitySnapshot?> GetSnapshotByDomainAsync(string normalizedDomain);
     }
 }

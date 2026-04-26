@@ -35,6 +35,11 @@ namespace CredibilityIndex.Api.Controllers
                 {
                     w.Category.Id,
                     w.Category.Name
+                },
+                Snapshot = w.CredibilitySnapshot == null ? null : new
+                {
+                    w.CredibilitySnapshot.Score,
+                    w.CredibilitySnapshot.RatingCount
                 }
             });
 
