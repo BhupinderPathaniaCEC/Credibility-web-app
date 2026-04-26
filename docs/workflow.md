@@ -17,3 +17,5 @@
 - [ ] Dependency Injection is registered in Program.cs.
 - [ ] No hardcoded strings; use configuration files.
 - [ ] API successfully communicates with the Angular UI.
+
+

@@ -2,12 +2,46 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.2.
 
+## Folder Structure
+```
+ui/
+└── credibility-ui/                 # Main Angular Application
+    ├── src/
+    │   ├── app/
+    │   │   ├── core/               # Singleton services: auth, interceptors, guards, layout
+    │   │   ├── shared/             # Reusable components, pipes, and directives
+    │   │   ├── features/           # Feature-based modules
+    │   │   │   ├── auth/           # Login and Registration flows
+    │   │   │   ├── websites/       # Website management and monitoring
+    │   │   │   ├── ratings/        # Credibility rating logic and displays
+    │   │   │   └── admin/          # Administrative dashboard and controls
+    │   │   ├── app.routes.ts       # Main application routing definitions
+    │   │   ├── app.component.* # Root component files
+    │   │   └── app.config.ts       # Global application configuration
+    │   ├── assets/                 # Static assets (images, icons, fonts)
+    │   ├── environments/           # Environment-specific configurations (Dev/Prod)
+    │   └── main.ts                 # Main entry point for the application
+    ├── angular.json                # Angular CLI configuration
+    ├── package.json                # Project dependencies and scripts
+    ├── tsconfig.json               # TypeScript compiler configuration
+    └── README.md                   # UI-specific documentation           # Main project 
+```
+# Credibility Index - Frontend UI
+
+The user interface for the Credibility Index, built with Angular.
+
+### 🚀 Local Setup
+1. **Prerequisites**: 
+   - [Node.js](https://nodejs.org/) (LTS)
+   - [Angular CLI](https://angular.io/cli) (`npm install -g @angular/cli`)
+
+
 ## Development server
 
 To start a local development server, run:
 
 ```bash
-ng serve
+make dev-ui
 ```
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
@@ -31,7 +65,7 @@ ng generate --help
 To build the project run:
 
 ```bash
-ng build
+make build
 ```
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.

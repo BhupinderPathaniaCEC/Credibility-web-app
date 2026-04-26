@@ -1,7 +1,7 @@
 # 🚀 Developer Onboarding Checklist
 
 ### 1. Environment Setup
-- [ ] Install .NET 8 SDK and Node.js (Latest LTS).
+- [ ] Install .NET 10 SDK and Node.js (Latest LTS).
 - [ ] Clone the repository and open CredibilityIndex.sln.
 - [ ] Ensure appsettings.Development.json in the API project points to your local SQL instance.
 
@@ -15,3 +15,6 @@
 - [ ] Run npm install.
 - [ ] Run npm start (or ng serve).
 - [ ] Access the app at http://localhost:4200.
+
+
+

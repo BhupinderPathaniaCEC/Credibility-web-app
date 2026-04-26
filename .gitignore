@@ -1,6 +1,18 @@
 #compiled output
 bin/
 obj/
+# [Bb]in/
+# [Ob]j/
+#IDE files
+.vscode/
+.vs/
+*.user/
+
+#Environment files
+.env
+#compiled output
+bin/
+obj/
 
 #IDE files
 .vscode/
