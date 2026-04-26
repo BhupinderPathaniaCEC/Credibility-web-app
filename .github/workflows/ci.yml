@@ -1,6 +1,5 @@
 name: .NET Core CI
 
-# 1. When should this run? 
 on:
   push:
     branches: ["**"]
@@ -9,34 +8,27 @@ on:
 
 jobs:
   build-and-test:
-    # 2. What OS should the server run?
     runs-on: ubuntu-latest
 
     steps:
-    # 3. Pulls your code from the repository
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    # 4. Installs the .NET 10 SDK on the GitHub server
-    - name: Setup .NET 10 SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '10.0.x'
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
 
-    # 5. Installs Node.js (Required because 'make install' uses npm)
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    # 6. Uses your Makefile to restore NuGet and NPM packages
-    - name: Install Dependencies
-      run: make install
+      - name: Install Dependencies
+        run: make install
 
-    # 7. Uses your Makefile to build the solution
-    - name: Build Project
-      run: make build
+      - name: Build Project
+        run: make build
 
-    # 8. Uses your Makefile to run the Unit and Integration tests
-    - name: Run Tests
-      run: make test
+      - name: Run Tests
+        run: make test

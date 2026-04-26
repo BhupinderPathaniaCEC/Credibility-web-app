@@ -1,0 +1,8 @@
+DEFAULT_CONNECTION=Server=db;Database=CredibilityDb;User Id=sa;Password=YourStrongPassword123!;
+SA_PASSWORD=YourStrongPassword123!
+JWT_KEY=YourSuperSecretKey123!
+JWT_ISSUER=https://yourdomain.com
+JWT_AUDIENCE=https://yourdomain.com
+AUTH_DB_CONNECTION=Server=db;Database=AuthDb;User Id=sa;Password=YourStrongPassword123!;
+JWT_SECRET=AnotherSecretKey
+CORS_ORIGIN=http://your-frontend-url.com
