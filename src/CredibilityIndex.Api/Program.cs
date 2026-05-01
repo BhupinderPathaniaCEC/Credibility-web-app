@@ -5,20 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
 using OpenIddict.Validation.AspNetCore;
-using OpenIddict.Server;
-using static OpenIddict.Abstractions.OpenIddictConstants.GrantTypes;
 
 using System.Security.Cryptography.X509Certificates;
+using CredibilityIndex.Api.Configuration;
 using CredibilityIndex.Application.Interfaces;
 using CredibilityIndex.Infrastructure.Persistence;
 using CredibilityIndex.Infrastructure.Repositories;
 using CredibilityIndex.Infrastructure.Auth;
-using OpenIddict.Abstractions;
-using System.Security.Claims;
 using static OpenIddict.Abstractions.OpenIddictConstants;
-using Microsoft.Extensions.FileProviders;
-using System.IO;
-using Microsoft.AspNetCore.Server.IIS;
 using Serilog;
 
 
@@ -26,16 +20,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // -------------------------
 // Logging with Serilog (Structured JSON with CorrelationId enrichment)
+// -------------------------
 Log.Logger = new LoggerConfiguration()
-    .Enrich.FromLogContext() // Crucial: This picks up the "CorrelationId" from our middleware
-    .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter()) // Structured JSON
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter())
     .WriteTo.File(new Serilog.Formatting.Json.JsonFormatter(), "logs/log-.json", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
 builder.Host.UseSerilog();
 
 // -------------------------
-// 1. EF Core + SQLite/InMemory + OpenIddict entities
+// 1. EF Core + SQLite/SQL Server + OpenIddict entities
 // -------------------------
 builder.Services.AddDbContext<CredibilityDbContext>(options =>
 {
@@ -45,9 +40,12 @@ builder.Services.AddDbContext<CredibilityDbContext>(options =>
     }
     else
     {
-        var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=credibility.db";
+        var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
+            ?? "Data Source=credibility.db";
 
-        if (defaultConnection.Contains("Server=", StringComparison.OrdinalIgnoreCase) || defaultConnection.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) && defaultConnection.Contains(".db", StringComparison.OrdinalIgnoreCase) == false)
+        if (defaultConnection.Contains("Server=", StringComparison.OrdinalIgnoreCase) ||
+            (defaultConnection.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) &&
+             !defaultConnection.Contains(".db", StringComparison.OrdinalIgnoreCase)))
         {
             options.UseSqlServer(defaultConnection);
         }
@@ -56,32 +54,42 @@ builder.Services.AddDbContext<CredibilityDbContext>(options =>
             options.UseSqlite(defaultConnection);
         }
     }
-    options.UseOpenIddict(); // Enable OpenIddict entities
+
+    options.UseOpenIddict();
 });
 
 // -------------------------
-// 2. Identity + UI
+// 2. Identity + Identity UI (Razor Pages serve /Identity/Account/Login)
 // -------------------------
-
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<CredibilityDbContext>()
     .AddDefaultTokenProviders()
     .AddDefaultUI();
 
-// Cookie Configuration (For the UI)
+// Cookie scheme used to authenticate the user against the Identity UI before
+// /connect/authorize issues an authorization code.
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     options.SlidingExpiration = true;
-    options.LogoutPath = "/Identity/Account/Logout";
+    options.LoginPath = AppUrls.Routes.IdentityLogin;
+    options.LogoutPath = AppUrls.Routes.IdentityLogout;
+    options.AccessDeniedPath = AppUrls.Routes.IdentityAccessDenied;
 });
 
+// -------------------------
+// 3. CORS — allow the Angular SPA origin to call the API
+// -------------------------
+var spaOrigins = builder.Configuration
+        .GetSection(AppUrls.ConfigKeys.AllowedCorsOrigins)
+        .Get<string[]>()
+    ?? AppUrls.DefaultSpaOrigins;
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:4200","https://localhost:4200")
+        policy.WithOrigins(spaOrigins)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -89,12 +97,10 @@ builder.Services.AddCors(options =>
 });
 
 // -------------------------
-// 3. OpenIddict Server + Validation
+// 4. OpenIddict Server + Validation
 // -------------------------
-/// Access token lifetime is configured in appsettings.json and read here & without change code
 var accessTokenLifetime = builder.Configuration.GetValue<int>("IdentitySettings:AccessTokenLifetimeMinutes");
 
-// Only load the certificate in non-Testing environments
 X509Certificate2? cert = null;
 if (!builder.Environment.IsEnvironment("Testing"))
 {
@@ -103,21 +109,21 @@ if (!builder.Environment.IsEnvironment("Testing"))
         "SuperSecretPassword123!",
         X509KeyStorageFlags.DefaultKeySet,
         Pkcs12LoaderLimits.Defaults);
-    // Register the signing certificate in DI for JWT manual creation
     builder.Services.AddSingleton(cert);
 }
 else
 {
-    // For testing, create a dummy certificate
     using (var rsa = System.Security.Cryptography.RSA.Create(2048))
     {
-        var request = new System.Security.Cryptography.X509Certificates.CertificateRequest("CN=Test", rsa, System.Security.Cryptography.HashAlgorithmName.SHA256, System.Security.Cryptography.RSASignaturePadding.Pkcs1);
+        var request = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+            "CN=Test", rsa,
+            System.Security.Cryptography.HashAlgorithmName.SHA256,
+            System.Security.Cryptography.RSASignaturePadding.Pkcs1);
         cert = request.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(1));
     }
     builder.Services.AddSingleton(cert);
 }
 
-// Only configure OpenIddict in non-Testing environments
 if (!builder.Environment.IsEnvironment("Testing"))
 {
     builder.Services.AddOpenIddict()
@@ -126,48 +132,51 @@ if (!builder.Environment.IsEnvironment("Testing"))
             options.UseEntityFrameworkCore()
                    .UseDbContext<CredibilityDbContext>();
         })
-            .AddServer(options =>
-            {
-                // Endpoints
-                options.SetAuthorizationEndpointUris("/connect/authorize");
-                options.SetTokenEndpointUris("/connect/token");
-                options.SetRevocationEndpointUris("/connect/revoke");
+        .AddServer(options =>
+        {
+            // Endpoints
+            options.SetAuthorizationEndpointUris(AppUrls.Routes.Authorize);
+            options.SetTokenEndpointUris(AppUrls.Routes.Token);
+            options.SetEndSessionEndpointUris(AppUrls.Routes.EndSession);
+            options.SetRevocationEndpointUris(AppUrls.Routes.Revocation);
+            options.SetUserInfoEndpointUris(AppUrls.Routes.UserInfo);
 
-                // Grant types
-                options.AllowAuthorizationCodeFlow();
-                options.AllowRefreshTokenFlow();
-                options.AllowPasswordFlow();
+            // Grant types: SPA uses authorization_code + PKCE + refresh_token.
+            // Password grant is kept for legacy/testing only.
+            options.AllowAuthorizationCodeFlow();
+            options.AllowRefreshTokenFlow();
+            options.AllowPasswordFlow();
 
-                // For SPA/public clients, PKCE is strongly recommended.
-                options.RequireProofKeyForCodeExchange();
+            options.RequireProofKeyForCodeExchange();
+            options.AcceptAnonymousClients();
 
-                // Accept anonymous clients (no confidential client authentication enforced).
-                options.AcceptAnonymousClients();
+            options.AddEncryptionCertificate(cert)
+                   .AddSigningCertificate(cert);
 
-                // Use production certificates
-                options.AddEncryptionCertificate(cert)
-                    .AddSigningCertificate(cert);
+            // SPA-friendly: opaque reference tokens persisted in OpenIddictTokens.
+            options.DisableAccessTokenEncryption();
+            options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
+            options.UseReferenceAccessTokens();
+            options.UseReferenceRefreshTokens();
 
-                // In production, use a real certificate or other secure method to store keys
-                options.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenLifetime));
-                options.UseReferenceRefreshTokens();
+            options.UseAspNetCore()
+                .EnableAuthorizationEndpointPassthrough()
+                .EnableTokenEndpointPassthrough()
+                .EnableEndSessionEndpointPassthrough()
+                .EnableUserInfoEndpointPassthrough()
+                .DisableTransportSecurityRequirement();
 
-                options.UseAspNetCore()
-                    .EnableAuthorizationEndpointPassthrough()
-                    .EnableTokenEndpointPassthrough()
-                    .DisableTransportSecurityRequirement();
-
-                options.RegisterScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.OfflineAccess);
-            })
+            options.RegisterScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.Roles, Scopes.OfflineAccess);
+        })
         .AddValidation(options =>
         {
             options.UseLocalServer();
             options.UseAspNetCore();
         });
 
-    // -------------------------
-    // 4. Authentication (Production)
-    // -------------------------
+    // API requests are validated as bearer tokens. The /connect/authorize
+    // controller explicitly challenges the Identity cookie scheme to redirect
+    // anonymous users to /Identity/Account/Login.
     builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
@@ -177,48 +186,38 @@ if (!builder.Environment.IsEnvironment("Testing"))
 
 builder.Services.AddAuthorization();
 
+// Bind SPA client options (RedirectUris / PostLogoutRedirectUris / ClientId)
+// from the "SpaClient" config section so production hosts can be set via
+// appsettings.{Env}.json or environment variables (e.g. SpaClient__RedirectUris__0).
+builder.Services.Configure<SpaClientOptions>(
+    builder.Configuration.GetSection(SpaClientOptions.SectionName));
+
 // -------------------------
-// 5. Controllers + Razor Pages (Identity UI)
+// 5. Controllers + Razor Pages (Identity UI only)
 // -------------------------
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 
 // -------------------------
-// 6. Swagger / Swashbuckle
+// 6. Swagger
 // -------------------------
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add Memory Cache
 builder.Services.AddMemoryCache();
 
 // -------------------------
-// 7. Dependency Injection
+// 7. Application services
 // -------------------------
 builder.Services.AddScoped<IWebsiteRepository, WebsiteRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingQueryRepository, RatingQueryRepository>();
 
-
-
-// Add this in builder.Services section (before var app = builder.Build())
-// builder.Services.Configure<IISServerOptions>(options =>
-// {
-//     options.AllowSynchronousIO = true;
-// });
-
-// THIS is the actual fix for dots in route segments:
-builder.Services.Configure<RouteOptions>(options =>
-{
-    options.ConstraintMap["domainConstraint"] = typeof(string);
-});
-
 // -------------------------
-// Build App
+// Build app
 // -------------------------
 var app = builder.Build();
-
 
 using (var scope = app.Services.CreateScope())
 {
@@ -243,14 +242,13 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     app.UseSwaggerUI();
 }
 
-
 // -------------------------
-// Middleware
+// Middleware pipeline
 // -------------------------
 app.UseMiddleware<CorrelationIdMiddleware>();
 
-// Only use HTTPS redirection when not in Testing environment
-if (!app.Environment.IsEnvironment("Testing"))
+// Only redirect to HTTPS in production; allow HTTP in development for proxy access
+if (app.Environment.IsProduction())
 {
     app.UseHttpsRedirection();
 }
@@ -260,55 +258,13 @@ app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
 
-
-// Serve Angular static files from wwwroot/browser as the web root for the SPA
-var angularRootPath = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "browser");
-if (Directory.Exists(angularRootPath))
-{
-    app.UseDefaultFiles(new DefaultFilesOptions
-    {
-        FileProvider = new PhysicalFileProvider(angularRootPath),
-        RequestPath = string.Empty
-    });
-
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(angularRootPath),
-        RequestPath = string.Empty
-    });
-}
-// Serve default static files (includes Identity UI resources like CSS, JS)
+// Static files needed by the Razor-rendered Identity UI (CSS, JS, images).
 app.UseStaticFiles();
 
-// Serve Bootstrap from custom location
-var bootstrapPath = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "lib", "bootstrap", "dist");
-if (Directory.Exists(bootstrapPath))
-{
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(bootstrapPath),
-        RequestPath = "/Identity/lib/bootstrap/dist"
-    });
-}
-
 // -------------------------
-// Map Controllers & Identity UI (Razor Pages)
+// Endpoints
 // -------------------------
 app.MapControllers();
-app.MapRazorPages();
-
-// Fallback to SPA index.html for any unmatched routes (including "/").
-if (Directory.Exists(angularRootPath))
-{
-    app.MapFallback(async context =>
-    {
-        context.Response.ContentType = "text/html";
-        await context.Response.SendFileAsync(Path.Combine(angularRootPath, "index.html"));
-    });
-}
-else
-{
-    app.MapFallbackToFile("index.html");
-}
+app.MapRazorPages(); // /Identity/Account/Login, /Identity/Account/Logout, etc.
 
 app.Run();

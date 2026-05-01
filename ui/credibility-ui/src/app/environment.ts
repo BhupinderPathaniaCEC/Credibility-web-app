@@ -1,4 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://127.0.0.1:7222' // Your local .NET server
+  // Use the SPA proxy for local development so the browser does not need to trust
+  // the ASP.NET Core developer certificate directly.
+  apiUrl: '/api'
 };

@@ -1,17 +1,19 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn } from '@angular/router';
+import { AuthService } from './auth.service';
 
-export const authGuard: CanActivateFn = (route, state) => {
-  const router = inject(Router);
-  const token = localStorage.getItem('access_token');
+/**
+ * Allows the route only if the user holds a valid OpenIddict access token.
+ * Otherwise initiates the auth_code+PKCE login flow, returning the user to
+ * the originally requested URL after sign-in.
+ */
+export const authGuard: CanActivateFn = (_route, state) => {
+  const auth = inject(AuthService);
 
-  // If they have a token, let them in. 
-  // (In a production app, you'd also check if it's expired here)
-  if (token) {
-    return true; 
-  } else {
-    // Kick unauthenticated users to the home/login page
-    router.navigate(['/']); 
-    return false;
+  if (auth.hasValidToken()) {
+    return true;
   }
+
+  auth.login(state.url);
+  return false;
 };

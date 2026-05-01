@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using Microsoft.AspNetCore.Identity;
 using CredibilityIndex.Infrastructure.Auth;
@@ -9,6 +11,21 @@ public static class OpenIddictClientSeeder
         var manager = services.GetRequiredService<IOpenIddictApplicationManager>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+
+        // SPA client options come from the "SpaClient" config section. If unbound
+        // (e.g. running locally without overrides), fall back to dev defaults.
+        var spaOptions = services.GetService<IOptions<SpaClientOptions>>()?.Value
+            ?? services.GetService<IConfiguration>()?
+                .GetSection(SpaClientOptions.SectionName).Get<SpaClientOptions>()
+            ?? new SpaClientOptions();
+
+        var redirectUris = spaOptions.RedirectUris.Length > 0
+            ? spaOptions.RedirectUris
+            : SpaClientDefaults.RedirectUris;
+
+        var postLogoutRedirectUris = spaOptions.PostLogoutRedirectUris.Length > 0
+            ? spaOptions.PostLogoutRedirectUris
+            : SpaClientDefaults.PostLogoutRedirectUris;
 
         string[] roles = { "Admin", "User" };
         foreach (var role in roles)
@@ -93,36 +110,34 @@ public static class OpenIddictClientSeeder
         }
 
         // Register Angular SPA as a public client for authorization code/PKCE flows.
+        // The SPA is hosted independently (e.g. ng serve at :4200, or a static host
+        // in production). The API at :7222 only exposes /connect/* + /api/* + /Identity/*.
         var spaDescriptor = new OpenIddictApplicationDescriptor
         {
-            ClientId = "credibility-ui-spa",
+            ClientId = spaOptions.ClientId,
             ClientType = OpenIddictConstants.ClientTypes.Public,
-            DisplayName = "Credibility Angular SPA",
-            RedirectUris =
-            {
-                // Served directly by the API at the application root in development.
-                new Uri("https://localhost:7222/"),
-                new Uri("https://localhost:7222/callback")
-            },
-            PostLogoutRedirectUris =
-            {
-                new Uri("https://localhost:7222/")
-            },
+            ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
+            DisplayName = spaOptions.DisplayName,
             Permissions =
             {
                 // Endpoints
                 OpenIddictConstants.Permissions.Endpoints.Authorization,
                 OpenIddictConstants.Permissions.Endpoints.Token,
+                OpenIddictConstants.Permissions.Endpoints.EndSession,
+                OpenIddictConstants.Permissions.Endpoints.Revocation,
 
-                // Grant types
+                // Grant types — SPA only uses authorization_code + refresh_token.
                 OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
                 OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                OpenIddictConstants.Permissions.GrantTypes.Password,
+
+                // Response types
+                OpenIddictConstants.Permissions.ResponseTypes.Code,
 
                 // Scopes
                 OpenIddictConstants.Permissions.Prefixes.Scope + OpenIddictConstants.Scopes.OpenId,
                 OpenIddictConstants.Permissions.Prefixes.Scope + OpenIddictConstants.Scopes.Profile,
                 OpenIddictConstants.Permissions.Prefixes.Scope + OpenIddictConstants.Scopes.Email,
+                OpenIddictConstants.Permissions.Prefixes.Scope + OpenIddictConstants.Scopes.Roles,
                 OpenIddictConstants.Permissions.Prefixes.Scope + OpenIddictConstants.Scopes.OfflineAccess
             },
             Requirements =
@@ -130,6 +145,15 @@ public static class OpenIddictClientSeeder
                 OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange
             }
         };
+
+        foreach (var uri in redirectUris)
+        {
+            spaDescriptor.RedirectUris.Add(new Uri(uri));
+        }
+        foreach (var uri in postLogoutRedirectUris)
+        {
+            spaDescriptor.PostLogoutRedirectUris.Add(new Uri(uri));
+        }
 
         var existingSpa = await manager.FindByClientIdAsync(spaDescriptor.ClientId);
         if (existingSpa is null)

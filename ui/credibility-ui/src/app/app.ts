@@ -1,7 +1,5 @@
-
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { TokenService } from './core/auth/token.service';
 import { HeaderComponent } from './core/layout/header/header.component';
 
 
@@ -11,12 +9,6 @@ import { HeaderComponent } from './core/layout/header/header.component';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App implements OnInit {
+export class App {
   protected readonly title = signal('credibility-ui');
-
-  constructor(private tokenService: TokenService) {}
-
-  ngOnInit(): void {
-    this.tokenService.fetchAndStoreToken();
-  }
 }

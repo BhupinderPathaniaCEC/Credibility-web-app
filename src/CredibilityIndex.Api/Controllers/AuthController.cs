@@ -13,6 +13,7 @@ using OpenIddict.Server.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using CredibilityIndex.Infrastructure.Auth;
 using CredibilityIndex.Api.Contracts.Auth;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CredibilityIndex.Api.Controllers
 {
@@ -39,54 +40,45 @@ namespace CredibilityIndex.Api.Controllers
         private readonly X509Certificate2 _signingCertificate;
 
         // GET: api/auth/token - Issue a token for the currently authenticated user (via Identity cookie)
-        [HttpGet("token")]
-        [Authorize(AuthenticationSchemes = "Identity.Application")]
-        public async Task<IActionResult> GetToken([FromServices] IOpenIddictTokenManager tokenManager, [FromServices] IOpenIddictApplicationManager appManager)
+        [HttpPost("token")]
+        [Authorize(AuthenticationSchemes = "Identity.Application")] // Requires the Identity Cookie
+        public async Task<IActionResult> GetToken()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
                 return Unauthorized();
 
-            // Build claims
-            var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, nameType: Claims.Name, roleType: Claims.Role);
-            identity.SetClaim(Claims.Subject, await _userManager.GetUserIdAsync(user));
-            identity.SetClaim(Claims.Email, user.Email);
-            identity.SetClaim(Claims.Name, user.UserName);
-            identity.SetClaim(Claims.GivenName, user.DisplayName ?? user.UserName);
+            // 1. Create the Identity specifically for OpenIddict
+            var identity = new ClaimsIdentity(
+                TokenValidationParameters.DefaultAuthenticationType,
+                Claims.Name,
+                Claims.Role);
+
+            // 2. Add your Claims
+            identity.SetClaim(Claims.Subject, await _userManager.GetUserIdAsync(user))
+                    .SetClaim(Claims.Email, user.Email)
+                    .SetClaim(Claims.Name, user.UserName)
+                    .SetClaim(Claims.GivenName, user.DisplayName ?? user.UserName);
+
             var roles = await _userManager.GetRolesAsync(user);
             identity.SetClaims(Claims.Role, [.. roles]);
 
-            var now = DateTime.UtcNow;
-            var expires = now.AddMinutes(60); // You can make this configurable
+            // 3. Create the Principal and set the Scopes requested by your Angular app
+            var principal = new ClaimsPrincipal(identity);
+            principal.SetScopes(Scopes.Profile, Scopes.Email, Scopes.OfflineAccess);
 
-            var claims = identity.Claims;
+            // 4. THE MOST IMPORTANT STEP: Set Destinations
+            // By default, OpenIddict keeps claims hidden for security. 
+            // You MUST tell it to put these claims inside the Access Token.
+            foreach (var claim in principal.Claims)
+            {
+                claim.SetDestinations(Destinations.AccessToken);
+            }
 
-            var signingCredentials = new Microsoft.IdentityModel.Tokens.X509SigningCredentials(_signingCertificate);
-
-            var issuer = "https://localhost:7222"; // Must match the OpenIddict server base URL and redirect URIs
-            var audience = "credibility-ui-spa"; // Use the SPA client id
-
-            // Create header with correct type for access token
-            //string issuer = null, string audience = null, IEnumerable<Claim> claims = null, DateTime? notBefore = null, DateTime? expires = null, SigningCredentials signingCredentials = null)
-
-            var header = new System.IdentityModel.Tokens.Jwt.JwtHeader(signingCredentials);
-            header["typ"] = "at+jwt";
-
-            var payload = new System.IdentityModel.Tokens.Jwt.JwtPayload(
-                issuer,
-                audience,
-                claims,
-                now,
-                expires
-            );
-
-            var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
-                header,
-                payload
-            );
-
-            var tokenString = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().WriteToken(jwt);
-            return Ok(new { access_token = tokenString });
+            // 5. THE MAGIC: Return a SignIn result targeting the OpenIddict scheme.
+            // OpenIddict will intercept this, grab your X509 certificate, sign the token, 
+            // apply the 60-minute expiration, and return the standard JSON response!
+            return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
         // POST: api/auth/register
         [HttpPost("register")]

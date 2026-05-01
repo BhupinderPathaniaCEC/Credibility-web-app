@@ -14,7 +14,7 @@ export interface CleanupState {
 @Injectable({ providedIn: 'root' })
 export class AdminCleanupService {
   // --- CONFIGURATION ---
-  private readonly API = 'https://localhost:7222/api/v1';
+  private readonly API = '/api/v1';
   private stateStore = new BehaviorSubject<Map<string, CleanupState>>(new Map());
   public states$ = this.stateStore.asObservable();
 

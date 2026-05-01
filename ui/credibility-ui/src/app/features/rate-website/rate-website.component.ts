@@ -57,8 +57,8 @@ export class RateWebsiteComponent implements OnInit {
     const encodedDomain = encodeURIComponent(this.domain);
 
     console.log('[DEBUG] Sending request to fetch rating...');
-    // FIXED: Use encodedDomain in the URL
-    this.http.get<any>(`https://localhost:7222/api/v1/websites/${encodedDomain}/ratings/me`, { headers })
+    // Use relative URL for proxy
+    this.http.get<any>(`/api/v1/websites/${encodedDomain}/ratings/me`, { headers })
       .subscribe({
         next: (existingRating) => {
           console.log('[DEBUG] API returned:', existingRating);
@@ -117,8 +117,8 @@ export class RateWebsiteComponent implements OnInit {
       comment: raw.comment
     };
 
-    // FIXED: Use encodedDomain in the URL
-    this.http.put(`https://localhost:7222/api/v1/websites/${encodedDomain}/ratings`, payload, { headers })
+    // Use relative URL for proxy
+    this.http.put(`/api/v1/websites/${encodedDomain}/ratings`, payload, { headers })
       .subscribe({
         next: () => {
           this.isSubmitting = false;

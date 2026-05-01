@@ -17,7 +17,7 @@ export class RegisterComponent {
   errorMessage = '';
   successMessage = '';
 
-  private apiUrl = 'https://localhost:7222/api/v1/auth/register';
+  private apiUrl = '/api/v1/auth/register';
 
   constructor(
     private fb: FormBuilder, 

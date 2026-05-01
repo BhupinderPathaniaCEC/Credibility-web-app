@@ -26,8 +26,8 @@ export class MyRatingsComponent implements OnInit {
   ratings: MyRating[] = [];
   isLoading = true;
   
-  // Your hardcoded C# backend URL
-  private apiUrl = 'https://localhost:7222/api/v1/me/ratings'; 
+  // Use relative URL for proxy
+  private apiUrl = '/api/v1/me/ratings'; 
 
   // 2. We inject HttpClient directly into the constructor
   constructor(

@@ -7,6 +7,7 @@ obj/
 .vscode/
 .vs/
 *.user/
+/src/CredibilityIndex.Api/[Bb]in/
 
 #Environment files
 .env

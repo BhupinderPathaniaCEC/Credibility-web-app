@@ -79,16 +79,17 @@ build:
 
 ## dev-backend: Runs the API with Hot Reload (auto-restarts on save)
 dev-backend:
-	dotnet watch run --project $(API_PROJ) --launch-profile https
+	dotnet watch run --project $(API_PROJ) --launch-profile http
 
 ## dev-ui: Runs the frontend development server
 dev-ui:
 	cd $(UI_DIR) && npm start
 
-## dev: Builds Angular into wwwroot and runs Backend + Frontend
+## dev: Runs the API (https://localhost:7222) and the Angular dev server
+##      (http://localhost:4200) in parallel. UI and API are deployed separately
+##      and communicate over CORS + the OpenID Connect flow.
 dev:
-	cd $(UI_DIR) && npx ng build --base-href=/
-	make -j 2 dev-backend
+	@$(MAKE) -j 2 dev-backend dev-ui
 
 docker-build:
 	docker build -f src/CredibilityIndex.Api/Dockerfile -t credibilityindex-api:latest .

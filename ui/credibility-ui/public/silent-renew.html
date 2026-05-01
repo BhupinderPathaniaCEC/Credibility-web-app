@@ -1,0 +1,11 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Silent Refresh</title>
+    <script>
+      // angular-oauth2-oidc relays the token to the parent window
+      parent.postMessage(location.hash || ('#' + location.search.substring(1)), location.origin);
+    </script>
+  </head>
+  <body></body>
+</html>

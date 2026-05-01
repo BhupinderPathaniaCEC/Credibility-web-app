@@ -14,7 +14,7 @@ export class AdminCategoriesComponent implements OnInit {
   categories: any[] = [];
   showForm = false;
   categoryForm: FormGroup;
-  private apiUrl = 'https://localhost:7222/api/v1/categories';
+  private apiUrl = '/api/v1/categories';
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     this.categoryForm = this.fb.group({
