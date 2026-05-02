@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-rate-website',
@@ -47,18 +48,11 @@ export class RateWebsiteComponent implements OnInit {
 
   // Check if the user already rated this site
   fetchExistingRating(): void {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      this.loading = false;  // Guard: no token = skip fetch
-      return;
-    }
-
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     const encodedDomain = encodeURIComponent(this.domain);
 
     console.log('[DEBUG] Sending request to fetch rating...');
-    // Use relative URL for proxy
-    this.http.get<any>(`/api/v1/websites/${encodedDomain}/ratings/me`, { headers })
+    // Auth header is attached by the OAuth client interceptor.
+    this.http.get<any>(`${environment.apiUrl}/api/v1/websites/${encodedDomain}/ratings/me`)
       .subscribe({
         next: (existingRating) => {
           console.log('[DEBUG] API returned:', existingRating);
@@ -103,8 +97,6 @@ export class RateWebsiteComponent implements OnInit {
     this.isSubmitting = true;
     this.errorMessage = null;
 
-    const token = localStorage.getItem('access_token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     const encodedDomain = encodeURIComponent(this.domain);
 
     const raw = this.ratingForm.value;
@@ -117,8 +109,8 @@ export class RateWebsiteComponent implements OnInit {
       comment: raw.comment
     };
 
-    // Use relative URL for proxy
-    this.http.put(`/api/v1/websites/${encodedDomain}/ratings`, payload, { headers })
+    // Auth header is attached by the OAuth client interceptor.
+    this.http.put(`${environment.apiUrl}/api/v1/websites/${encodedDomain}/ratings`, payload)
       .subscribe({
         next: () => {
           this.isSubmitting = false;

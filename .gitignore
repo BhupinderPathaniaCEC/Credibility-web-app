@@ -1,24 +1,11 @@
-#compiled output
-bin/
-obj/
-# [Bb]in/
-# [Ob]j/
-#IDE files
-.vscode/
-.vs/
-*.user/
-/src/CredibilityIndex.Api/[Bb]in/
-
-#Environment files
-.env
-#compiled output
+# Build output
 bin/
 obj/
 
-#IDE files
+# IDE files
 .vscode/
 .vs/
-*.user/
+*.user
 
-#Environment files
+# Environment files
 .env

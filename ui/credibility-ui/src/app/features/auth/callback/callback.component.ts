@@ -18,7 +18,7 @@ export class AuthCallbackComponent implements OnInit {
 
   ngOnInit(): void {
     // angular-oauth2-oidc stores the original route in `state`
-    const target = this.auth['oauth']?.state || '/';
-    this.router.navigateByUrl(decodeURIComponent(target as string) || '/', { replaceUrl: true });
+    const target = this.auth.getLoginTarget();
+    this.router.navigateByUrl(decodeURIComponent(target) || '/', { replaceUrl: true });
   }
 }

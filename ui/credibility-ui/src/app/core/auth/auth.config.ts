@@ -1,5 +1,9 @@
 import { AuthConfig } from 'angular-oauth2-oidc';
-import { environment } from '../../environment';
+import { environment } from '../../environments/environment';
+
+const normalizedIssuer = environment.apiUrl.endsWith('/')
+  ? environment.apiUrl
+  : `${environment.apiUrl}/`;
 
 /** OpenIddict client identifier — must match OpenIddictClientSeeder.SeedAsync(). */
 export const SPA_CLIENT_ID = 'credibility-ui-spa';
@@ -22,7 +26,7 @@ export const AuthRoutes = {
  */
 export const authConfig: AuthConfig = {
   // OpenIddict issuer (must match exactly; OIDC discovery uses /.well-known/openid-configuration)
-  issuer: window.location.origin + environment.apiUrl,
+  issuer: normalizedIssuer,
 
   // Where the SPA is served (registered as a redirect URI in the seeder)
   redirectUri: window.location.origin + AuthRoutes.callback,

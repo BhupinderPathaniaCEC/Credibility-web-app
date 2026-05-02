@@ -10,6 +10,7 @@ import { authConfig } from './auth.config';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly oauth = inject(OAuthService);
+  private discoveryLoaded = false;
 
   private readonly loggedIn$ = new BehaviorSubject<boolean>(false);
   readonly isLoggedIn$: Observable<boolean> = this.loggedIn$.asObservable();
@@ -23,6 +24,7 @@ export class AuthService {
     // ?code=... parameter on /callback if present.
     try {
       await this.oauth.loadDiscoveryDocumentAndTryLogin();
+      this.discoveryLoaded = true;
     } catch (err) {
       console.error('[Auth] Discovery / login failed:', err);
     }
@@ -35,7 +37,24 @@ export class AuthService {
 
   /** Begin the auth code + PKCE flow. Redirects to /connect/authorize. */
   login(targetRoute?: string): void {
-    this.oauth.initLoginFlow(targetRoute ?? window.location.pathname);
+    const target = targetRoute ?? window.location.pathname;
+
+    if (this.discoveryLoaded) {
+      this.oauth.initCodeFlow(target);
+      return;
+    }
+
+    this.oauth.loadDiscoveryDocument()
+      .then(() => {
+        this.discoveryLoaded = true;
+        this.oauth.initCodeFlow(target);
+      })
+      .catch((err) => {
+        console.error('[Auth] Login fallback triggered:', err);
+
+        // Keep flow OAuth-only: direct Identity login skips OIDC callback and
+        // can bounce back to the API host instead of the SPA callback URI.
+      });
   }
 
   /** Trigger the OpenIddict end-session endpoint and clear local tokens. */
@@ -53,6 +72,10 @@ export class AuthService {
 
   get identityClaims(): Record<string, unknown> | null {
     return (this.oauth.getIdentityClaims() as Record<string, unknown>) ?? null;
+  }
+
+  getLoginTarget(): string {
+    return this.oauth.state || '/';
   }
 
   isAdmin(): boolean {

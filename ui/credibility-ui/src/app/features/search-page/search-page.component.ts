@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface WebsiteCategory {
   id: number;
@@ -27,7 +29,7 @@ interface WebsiteSearchResult {
 @Component({
   selector: 'app-search-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './search-page.component.html',
   styleUrls: ['./search-page.component.css']
 })
@@ -40,7 +42,8 @@ export class SearchPageComponent {
   hasSearched = false;
 
   constructor(private readonly http: HttpClient,
-    private readonly router: Router) { }
+    private readonly router: Router,
+    private readonly auth: AuthService) { }
 
   get canSearch(): boolean {
     return this.rawUrl.trim().length > 0 && !this.loading;
@@ -58,10 +61,9 @@ export class SearchPageComponent {
 
     this.loading = true;
 
-    this.http
-      .get<WebsiteSearchResult[]>(`/api/v1/websites`, {
-        params: { query }
-      })
+    this.http.get<WebsiteSearchResult[]>(`${environment.apiUrl}/api/v1/websites`, {
+      params: { query }
+    })
       .subscribe({
         next: (res) => {
           this.results = res ?? [];
@@ -81,30 +83,11 @@ export class SearchPageComponent {
   }
 
   rate(result: WebsiteSearchResult): void {
-    const ratingURL = encodeURIComponent(`/rate/${encodeURIComponent(result.domain)}`);
-    if (localStorage.getItem('access_token')) {
+    if (this.auth.hasValidToken()) {
       this.router.navigate(['/rate', result.domain]);
-    } else {
-      window.location.href = `/Identity/Account/Login?returnUrl=${ratingURL}`;
+      return;
     }
-  }
 
-  createAndRate(): void {
-    const current = this.rawUrl.trim();
-    if (!current) return; // Don't navigate if empty
-
-    // Encode the website the user typed (e.g., "google.com")
-    const encodedUrl = encodeURIComponent(current);
-
-    // The target URL should now be /rate/google.com
-    const target = `/rate/${encodedUrl}`;
-    const returnUrl = encodeURIComponent(target);
-
-    if (localStorage.getItem('access_token')) {
-      // NAVIGATE TO THE ACTUAL DOMAIN, NOT "new"
-      this.router.navigate(['/rate', current]);
-    } else {
-      window.location.href = `/Identity/Account/Login?returnUrl=${returnUrl}`;
-    }
+    this.auth.login(`/rate/${result.domain}`);
   }
 }

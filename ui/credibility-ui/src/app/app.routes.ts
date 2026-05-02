@@ -19,7 +19,11 @@ import { AuthService } from './core/auth/auth.service';
 export const routes: Routes = [
     { path: '', pathMatch: 'full', component: SearchPageComponent },
     { path: 'website/:domain', component: WebsiteDetailsComponent },
-    { path: 'rate/:domain', component: RateWebsiteComponent },
+    {
+        path: 'rate/:domain',
+        component: RateWebsiteComponent,
+        canActivate: [authGuard]
+    },
     {
         path: 'admin/categories',
         component: AdminCategoriesComponent,

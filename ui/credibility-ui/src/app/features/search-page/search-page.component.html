@@ -65,7 +65,7 @@
           If you can't find the website you're looking for, you can create it and leave the first
           rating.
         </p>
-        <button type="button" class="primary-outline" (click)="createAndRate()">
+        <button type="button" class="primary-outline" [routerLink]="['/rate', rawUrl.trim()]" [disabled]="!rawUrl.trim()">
           Create &amp; rate it
         </button>
       </section>

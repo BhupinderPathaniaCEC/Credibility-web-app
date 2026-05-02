@@ -77,19 +77,45 @@ install:
 build:
 	dotnet build
 
-## dev-backend: Runs the API with Hot Reload (auto-restarts on save)
+## local-backend: Runs the API with Development environment (local profile)
+local-backend:
+	dotnet watch run --project $(API_PROJ) --launch-profile local
+
+## dev-backend: Runs the API with CI environment
 dev-backend:
-	dotnet watch run --project $(API_PROJ) --launch-profile http
+	dotnet watch run --project $(API_PROJ) --launch-profile dev
 
-## dev-ui: Runs the frontend development server
+## prod-backend: Runs the API with Production environment
+prod-backend:
+	dotnet watch run --project $(API_PROJ) --launch-profile prod
+
+## local-ui: Runs frontend using local environment.ts
+local-ui:
+	cd $(UI_DIR) && npm run start:local
+
+## dev-ui: Runs frontend using environment.dev.ts
 dev-ui:
-	cd $(UI_DIR) && npm start
+	cd $(UI_DIR) && npm run start:dev
 
-## dev: Runs the API (https://localhost:7222) and the Angular dev server
-##      (http://localhost:4200) in parallel. UI and API are deployed separately
-##      and communicate over CORS + the OpenID Connect flow.
+## prod-ui: Runs frontend using environment.prod.ts
+prod-ui:
+	cd $(UI_DIR) && npm run start:prod
+
+## local: Runs local API (https://localhost:7222) and local Angular server in parallel
+local:
+	@$(MAKE) -j 2 local-backend local-ui
+
+## dev: Runs Angular dev environment server (targets dev API)
 dev:
 	@$(MAKE) -j 2 dev-backend dev-ui
+
+## prod: Runs Angular production environment server (targets prod API)
+prod:
+	@$(MAKE) -j 2 prod-backend prod-ui
+
+## dev-backend-http: Runs the API on HTTP profile (legacy)
+dev-backend-http:
+	dotnet watch run --project $(API_PROJ) --launch-profile http
 
 docker-build:
 	docker build -f src/CredibilityIndex.Api/Dockerfile -t credibilityindex-api:latest .

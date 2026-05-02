@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 // 1. Updated Interface to match your exact backend JSON
 interface BackendWebsiteResponse {
@@ -64,7 +65,7 @@ export class WebsiteDetailsComponent implements OnInit {
     this.error = null;
     this.notFound = false;
 
-    this.http.get<BackendWebsiteResponse>(`/api/v1/websites/${this.domain}/`).subscribe({
+    this.http.get<BackendWebsiteResponse>(`${environment.apiUrl}/api/v1/websites/${this.domain}/`).subscribe({
       next: (res) => {
         console.log('[DEBUG] SUCCESS! Data received:', res); 
         
