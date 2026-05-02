@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using CredibilityIndex.Infrastructure.Auth;
 using Microsoft.AspNetCore.Authentication;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
@@ -20,7 +22,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace CredibilityIndex.Api.Controllers
 {
     /// <summary>
-    /// Handles OpenIddict's /connect/authorize endpoint as an MVC pass-through.
+    /// Handles OpenIddict's OIDC endpoints (/connect/authorize, /connect/token, /connect/logout).
     /// Flow:
     ///   SPA -> /connect/authorize
     ///        -> not authenticated => Challenge Identity cookie scheme
@@ -33,13 +35,119 @@ namespace CredibilityIndex.Api.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger<AuthorizationController> _logger;
+        private readonly X509Certificate2? _signingCertificate;
 
         public AuthorizationController(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<AuthorizationController> logger,
+            X509Certificate2? signingCertificate = default)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _logger = logger;
+            _signingCertificate = signingCertificate;
+        }
+
+        /// <summary>Token exchange endpoint for authorization code and refresh token grants.</summary>
+        [HttpPost("~/connect/token")]
+        [IgnoreAntiforgeryToken]
+        [Consumes("application/x-www-form-urlencoded")]
+        [Produces("application/json")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Exchange()
+        {
+            try
+            {
+                var feature = HttpContext.Features.Get<OpenIddictServerAspNetCoreFeature>();
+                var request = feature?.Transaction?.Request;
+                if (request == null)
+                {
+                    _logger?.LogError("OpenIddict request cannot be retrieved from context.");
+                    return BadRequest("The OpenIddict request cannot be retrieved.");
+                }
+
+                _logger?.LogInformation("Token exchange requested. grant_type={GrantType}, client_id={ClientId}", request.GrantType, request.ClientId);
+
+                if (request.IsRefreshTokenGrantType())
+                {
+                    var authenticateResult = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    if (!authenticateResult.Succeeded || authenticateResult.Principal is null)
+                    {
+                        _logger?.LogWarning("Refresh token authentication failed.");
+                        return Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+
+                    return SignIn(authenticateResult.Principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                }
+
+                if (request.IsAuthorizationCodeGrantType())
+                {
+                    var principal = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    if (!principal.Succeeded || principal.Principal is null)
+                    {
+                        _logger?.LogWarning("Authorization code authentication failed.");
+                        return Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+
+                    return SignIn(principal.Principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                }
+
+                if (request.IsPasswordGrantType())
+                {
+                    if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+                    {
+                        _logger?.LogWarning("Password grant missing username or password.");
+                        return Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+
+                    var user = await _userManager.FindByEmailAsync(request.Username)
+                               ?? await _userManager.FindByNameAsync(request.Username);
+
+                    if (user is null)
+                    {
+                        _logger?.LogWarning("User not found for password grant.");
+                        return Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+
+                    var valid = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
+                    if (!valid.Succeeded)
+                    {
+                        _logger?.LogWarning("Password validation failed.");
+                        return Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+
+                    var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, nameType: Claims.Name, roleType: Claims.Role);
+                    identity.SetClaim(Claims.Subject, await _userManager.GetUserIdAsync(user));
+                    identity.SetClaim(Claims.Email, user.Email);
+                    identity.SetClaim(Claims.Name, user.UserName);
+                    identity.SetClaim(Claims.GivenName, user.DisplayName ?? user.UserName);
+
+                    var roles = await _userManager.GetRolesAsync(user);
+                    identity.SetClaims(Claims.Role, [.. roles]);
+
+                    identity.SetDestinations(claim => claim.Type switch
+                    {
+                        Claims.Subject or Claims.Email or Claims.Name or Claims.GivenName or Claims.Role
+                            => new[] { Destinations.AccessToken, Destinations.IdentityToken },
+                        _ => new[] { Destinations.AccessToken }
+                    });
+
+                    var principal = new ClaimsPrincipal(identity);
+                    principal.SetScopes(request.GetScopes());
+
+                    return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                }
+
+                _logger?.LogWarning("Unsupported grant type: {GrantType}", request.GrantType);
+                return BadRequest("The specified grant type is not supported.");
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "An error occurred during token exchange.");
+                return StatusCode(500, "An error occurred during token exchange.");
+            }
         }
 
         [HttpGet("~/connect/authorize")]
