@@ -264,7 +264,8 @@ app.UseStaticFiles();
 // -------------------------
 // Endpoints
 // -------------------------
-app.MapControllers().RequireCors("AllowAngular");
+// app.MapControllers().RequireCors("AllowAngular");
+app.MapControllers();
 app.MapRazorPages(); // /Identity/Account/Login, /Identity/Account/Logout, etc.
 
 app.Run();

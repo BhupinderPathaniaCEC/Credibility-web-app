@@ -39,7 +39,7 @@ namespace CredibilityIndex.Api.Controllers
 
         [HttpGet("{domain}/ratings/me")]
         [Authorize]
-        public async Task<IActionResult> GetMyUserRating(string domain)
+        public async Task<ActionResult> GetMyUserRating(string domain)
         {
             var decodedDomain = Uri.UnescapeDataString(domain);
             var normalizedDomain = DomainUtility.NormalizeDomain(decodedDomain);
